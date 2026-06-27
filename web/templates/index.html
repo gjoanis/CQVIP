@@ -53,8 +53,15 @@
         <h2>Uploaded Documents</h2>
     <div class="section">
         <h2>Requirements Traceability</h2>
+        <input
+    type="text"
+    id="requirementSearch"
+    placeholder="Search requirements..."
+    onkeyup="filterRequirements()"
+    class="search-box"
+>
 
-        <table>
+        <table id="requirementsTable">
             <thead>
                 <tr>
                     <th>Requirement ID</th>
@@ -72,13 +79,21 @@
                         <td>{{ requirement.req_id }}</td>
                         <td>{{ requirement.text }}</td>
                         <td>{{ requirement.category }}</td>
-                        <td>{{ requirement.criticality }}</td>
-                        <td>{{ requirement.recommended }}</td>
+                        <td>
+                            <span class="badge {{ requirement.criticality | lower }}">
+                                {{ requirement.criticality }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="phase">
+                                {{ requirement.recommended }}
+                            </span>
+                        </td>
                         <td>
                             {% if requirement.verified %}
-                                Verified
+                            <span class="badge verified">Verified</span>
                             {% else %}
-                                Open
+                            <span class="badge open">Open</span>
                             {% endif %}
                         </td>
                     </tr>
