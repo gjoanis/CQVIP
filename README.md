@@ -29,6 +29,18 @@ CQVIP is an AI-powered validation platform built for the pharmaceutical and biot
 - Chart.js
 
 ---
+## Dashboard
+
+![CQVIP Dashboard](Image 6-27-26 at 2.54 PM.jpg)
+
+![Requirements Extraction](Image 6-27-26 at 2.55 PM.jpg)
+
+![Traceability Matrix](Image 6-27-26 at 2.56 PM.jpg)
+
+![Inspection Readiness](Image 6-27-26 at 2.57 PM.jpg)
+
+![Executive Dashboard](Image 6-27-26 at 2.58 PM.jpg)
+
 
 ## Dashboard
 
