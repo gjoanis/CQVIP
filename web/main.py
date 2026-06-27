@@ -45,7 +45,24 @@ def get_dashboard_data():
             "verified": getattr(requirement, "verified", False)
         })
 
+        open_requirements = total_requirements - 1 if total_requirements > 0 else 0
+
+        if total_requirements > 0:
+            readiness_score = round(((total_requirements - open_requirements) / total_requirements) * 100)
+        else:
+            readiness_score = 0
+
+        if readiness_score >= 80:
+            readiness_status = "Inspection Ready"
+        elif readiness_score >= 50:
+            readiness_status = "Needs Review"
+        else:
+            readiness_status = "Not Ready"
+
     return {
+        "open_requirements": open_requirements,
+        "readiness_score": readiness_score,
+        "readiness_status": readiness_status,
         "requirements": requirements,
         "total_requirements": total_requirements,
         "critical_requirements": critical_requirements,
