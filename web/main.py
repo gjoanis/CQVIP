@@ -53,3 +53,11 @@ async def upload(file: UploadFile = File(...)):
         "message": "Upload successful",
         "filename": file.filename
     }
+
+@app.get("/upload")
+async def upload_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="upload.html",
+        context={}
+    )
