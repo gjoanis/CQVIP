@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,7 +17,6 @@
 <div class="container">
 
     <div class="card-grid">
-
         <div class="card">
             <h3>Total Requirements</h3>
             <p>{{ dashboard.total_requirements }}</p>
@@ -30,27 +28,25 @@
         </div>
 
         <div class="card">
-    <h3>Open Requirements</h3>
-    <p>{{ dashboard.open_requirements }}</p>
-</div>
+            <h3>Open Requirements</h3>
+            <p>{{ dashboard.open_requirements }}</p>
+        </div>
 
-<div class="card">
-    <h3>Inspection Readiness</h3>
-    <p>{{ dashboard.readiness_score }}%</p>
-    <small>{{ dashboard.readiness_status }}</small>
-</div>
+        <div class="card">
+            <h3>Inspection Readiness</h3>
+            <p>{{ dashboard.readiness_score }}%</p>
+            <small>{{ dashboard.readiness_status }}</small>
+        </div>
 
-<div class="card">
-    <h3>Project</h3>
-    <p style="font-size:18px;">CQVIP Demonstration</p>
-</div>
-
+        <div class="card">
+            <h3>Project</h3>
+            <p style="font-size:18px;">CQVIP Demonstration</p>
+        </div>
 
         <div class="card">
             <h3>Asset</h3>
             <p style="font-size:18px;">Decontamination Washer</p>
         </div>
-
     </div>
 
     <div class="section">
@@ -85,26 +81,26 @@
 
         <div class="filter-row">
             <input
-                    type="text"
-                    id="requirementSearch"
-                    placeholder="Search requirements..."
-                    onkeyup="filterRequirements()"
-                    class="search-box"
+                type="text"
+                id="requirementSearch"
+                placeholder="Search requirements..."
+                onkeyup="filterRequirements()"
+                class="search-box"
             >
 
-    <select id="criticalityFilter" onchange="filterRequirements()" class="filter-select">
-        <option value="">All Criticalities</option>
-        <option value="critical">Critical</option>
-        <option value="major">Major</option>
-        <option value="minor">Minor</option>
-    </select>
+            <select id="criticalityFilter" onchange="filterRequirements()" class="filter-select">
+                <option value="">All Criticalities</option>
+                <option value="critical">Critical</option>
+                <option value="major">Major</option>
+                <option value="minor">Minor</option>
+            </select>
 
-    <select id="statusFilter" onchange="filterRequirements()" class="filter-select">
-        <option value="">All Statuses</option>
-        <option value="verified">Verified</option>
-        <option value="open">Open</option>
-    </select>
-</div>
+            <select id="statusFilter" onchange="filterRequirements()" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="verified">Verified</option>
+                <option value="open">Open</option>
+            </select>
+        </div>
 
         <table id="requirementsTable">
             <thead>
@@ -120,7 +116,15 @@
 
             <tbody>
                 {% for requirement in dashboard.requirements %}
-                    <tr>
+                    <tr
+                        data-id="{{ requirement.req_id }}"
+                        data-text="{{ requirement.text }}"
+                        data-category="{{ requirement.category }}"
+                        data-criticality="{{ requirement.criticality }}"
+                        data-phase="{{ requirement.recommended }}"
+                        data-status="{{ 'Verified' if requirement.verified else 'Open' }}"
+                        onclick="showRequirementDetails(this)"
+                    >
                         <td>{{ requirement.req_id }}</td>
                         <td>{{ requirement.text }}</td>
                         <td>{{ requirement.category }}</td>
@@ -148,6 +152,11 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div id="requirementDetails" class="requirement-details">
+            <h3>Requirement Details</h3>
+            <p>Select a requirement to view details.</p>
+        </div>
     </div>
 
     <div class="section">
@@ -170,7 +179,6 @@
 
 </div>
 
-
 <script>
 function filterRequirements() {
     let searchInput = document.getElementById("requirementSearch").value.toLowerCase();
@@ -187,12 +195,21 @@ function filterRequirements() {
         let matchesCriticality = criticalityFilter === "" || rowText.includes(criticalityFilter);
         let matchesStatus = statusFilter === "" || rowText.includes(statusFilter);
 
-        if (matchesSearch && matchesCriticality && matchesStatus) {
-            rows[i].style.display = "";
-        } else {
-            rows[i].style.display = "none";
-        }
+        rows[i].style.display = matchesSearch && matchesCriticality && matchesStatus ? "" : "none";
     }
+}
+
+function showRequirementDetails(row) {
+    let details = document.getElementById("requirementDetails");
+
+    details.innerHTML = `
+        <h3>${row.dataset.id}</h3>
+        <p><strong>Requirement:</strong> ${row.dataset.text}</p>
+        <p><strong>Category:</strong> ${row.dataset.category}</p>
+        <p><strong>Criticality:</strong> ${row.dataset.criticality}</p>
+        <p><strong>Recommended Phase:</strong> ${row.dataset.phase}</p>
+        <p><strong>Status:</strong> ${row.dataset.status}</p>
+    `;
 }
 </script>
 
