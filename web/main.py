@@ -7,6 +7,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.services.cqvip_engine import CQVIPEngine
+from app.services.ai_insights import AIInsights
+from app.services.chart_service import ChartService
 
 
 app = FastAPI(title="CQVIP")
@@ -15,57 +17,77 @@ templates = Jinja2Templates(directory="web/templates")
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 
+
 UPLOAD_FOLDER = "documents"
 PACKAGE_ZIP = "exports/Validation_Package.zip"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
+def safe_get(obj, attr, default=""):
+    return getattr(obj, attr, default)
+
+
 def get_dashboard_data():
     engine = CQVIPEngine()
     engine.load_documents()
-
-    total_requirements = len(engine.requirements)
-
-    critical_requirements = 0
-
-    for requirement in engine.requirements:
-        if requirement.criticality == "Critical":
-            critical_requirements += 1
 
     requirements = []
 
     for requirement in engine.requirements:
         requirements.append({
-            "req_id": requirement.req_id,
-            "text": requirement.text,
-            "category": requirement.category,
-            "criticality": requirement.criticality,
-            "recommended": getattr(requirement, "recommended_phase", getattr(requirement, "recommended", "")),
-            "verified": getattr(requirement, "verified", False)
+            "req_id": safe_get(requirement, "req_id"),
+            "text": safe_get(requirement, "text"),
+            "category": safe_get(requirement, "category"),
+            "criticality": safe_get(requirement, "criticality"),
+            "recommended": safe_get(
+                requirement,
+                "recommended_phase",
+                safe_get(requirement, "recommended")
+            ),
+            "verified": safe_get(requirement, "verified", False)
         })
 
-        open_requirements = total_requirements - 1 if total_requirements > 0 else 0
+    total_requirements = len(requirements)
 
-        if total_requirements > 0:
-            readiness_score = round(((total_requirements - open_requirements) / total_requirements) * 100)
-        else:
-            readiness_score = 0
+    critical_requirements = 0
+    open_requirements = 0
 
-        if readiness_score >= 80:
-            readiness_status = "Inspection Ready"
-        elif readiness_score >= 50:
-            readiness_status = "Needs Review"
-        else:
-            readiness_status = "Not Ready"
+    for requirement in requirements:
+        if requirement["criticality"] == "Critical":
+            critical_requirements += 1
+
+        if requirement["verified"] is False:
+            open_requirements += 1
+
+    if total_requirements > 0:
+        readiness_score = round(
+            ((total_requirements - open_requirements) / total_requirements) * 100
+        )
+    else:
+        readiness_score = 0
+
+    if readiness_score >= 80:
+        readiness_status = "Inspection Ready"
+    elif readiness_score >= 50:
+        readiness_status = "Needs Review"
+    else:
+        readiness_status = "Not Ready"
+
+    ai = AIInsights(requirements)
+    charts = ChartService(requirements)
 
     return {
+        "total_requirements": total_requirements,
+        "critical_requirements": critical_requirements,
         "open_requirements": open_requirements,
         "readiness_score": readiness_score,
         "readiness_status": readiness_status,
         "requirements": requirements,
-        "total_requirements": total_requirements,
-        "critical_requirements": critical_requirements,
+        "charts": charts.build_all_charts(),
+        "ai_summary": ai.generate_project_summary(),
+        "ai_gap_analysis": ai.generate_gap_analysis(),
+        "ai_recommendations": ai.generate_recommendations(),
         "lifecycle": [
             {"stage": "URS", "status": "Complete"},
             {"stage": "FAT", "status": "Complete"},
@@ -107,7 +129,6 @@ def upload_page(request: Request):
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-
     for existing_file in os.listdir(UPLOAD_FOLDER):
         existing_path = os.path.join(UPLOAD_FOLDER, existing_file)
 
