@@ -1,20 +1,15 @@
 class ProjectConfig:
-    """
-    Global project configuration for CQVIP.
-    """
 
-    PROJECT_NAME = "Sample GMP Project"
+    PROJECT_NAME = "CQVIP Demonstration"
 
-    ASSET_NAME = "Equipment-001"
+    PROJECT_CODE = "CQVIP"
+
+    ASSET_NAME = "Decontamination Washer"
 
     ASSET_TYPE = "Process Equipment"
 
-    DOCUMENT_PREFIX = "VAL"
+    AUTHOR = "Gary Joanis"
 
-    REVISION = "0"
+    APPROVER = "QA Manager"
 
-    STATUS = "Draft"
-
-    AUTHOR = "CQVIP"
-
-    APPROVER = "Quality Assurance"
+    COMPANY = "CQVIP"

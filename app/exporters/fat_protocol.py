@@ -1,40 +1,26 @@
-from app.exporters.word_document import WordDocumentExporter
-from app.intelligence.requirement_engine import RequirementEngine
+from app.exporters.base_protocol import BaseProtocolExporter
 
 
-class FATProtocolExporter:
+class FATProtocolExporter(BaseProtocolExporter):
 
-    def __init__(self, project, asset, requirements):
-        self.project = project
-        self.asset = asset
-        self.requirements = requirements
+    def __init__(self, project, asset):
+
+        super().__init__(
+            project,
+            asset,
+            "Factory Acceptance Test Protocol",
+            "FAT_Protocol.docx"
+        )
 
     def generate(self):
 
-        engine = RequirementEngine()
-
-        document = WordDocumentExporter(
-            "Factory Acceptance Test Protocol",
-            self.project.name,
-            self.asset.name,
-            "FAT"
-        )
-
-        document.add_title_page()
-        document.add_document_information()
-        document.add_approval_table()
+        document = self.create_document()
 
         document.add_section_heading("Purpose")
         document.add_paragraph(
-            "The purpose of this Factory Acceptance Test (FAT) protocol "
-            "is to verify that the equipment has been manufactured and "
-            "operates in accordance with the approved design prior to shipment."
-        )
-
-        document.add_section_heading("Scope")
-        document.add_paragraph(
-            f"This protocol applies to the factory acceptance testing of "
-            f"{self.asset.name}."
+            "The purpose of the Factory Acceptance Test (FAT) is to verify "
+            "that the equipment has been manufactured and operates according "
+            "to the approved design specification prior to shipment."
         )
 
         document.add_responsibilities_table()
@@ -44,34 +30,19 @@ class FATProtocolExporter:
 
         document.add_section_heading("Factory Acceptance Tests")
 
-        for requirement in self.requirements:
+        checks = [
+            "Verify equipment identification.",
+            "Verify mechanical assembly.",
+            "Verify electrical installation.",
+            "Verify control system functionality.",
+            "Verify alarm functionality.",
+            "Verify safety interlocks.",
+            "Verify operational sequences.",
+            "Verify documentation package."
+        ]
 
-            strategy = engine.analyze(requirement)
-
-            document.add_section_heading(requirement.req_id)
-
-            document.add_paragraph(
-                f"Requirement:\n{requirement.text}"
-            )
-
-            document.add_paragraph(
-                f"Objective:\n{strategy['objective']}"
-            )
-
-            document.add_paragraph("Procedure")
-
-            for step in strategy["procedure"]:
-                document.add_paragraph(f"- {step}")
-
-            document.add_test_execution_table(
-                strategy["procedure"]
-            )
-
-            document.add_paragraph("Acceptance Criteria")
-
-            for criterion in strategy["acceptance"]:
-                document.add_paragraph(f"• {criterion}")
+        document.add_test_execution_table(checks)
 
         document.add_approval_table()
 
-        document.save("FAT_Protocol.docx")
+        self.save(document)

@@ -1,35 +1,32 @@
-from app.exporters.word_document import WordDocumentExporter
+from app.exporters.base_protocol import BaseProtocolExporter
 
 
-class IQProtocolExporter:
+class IQProtocolExporter(BaseProtocolExporter):
 
     def __init__(self, project, asset):
-        self.project = project
-        self.asset = asset
 
-    def generate(self):
-        document = WordDocumentExporter(
+        super().__init__(
+            project,
+            asset,
             "Installation Qualification Protocol",
-            self.project.name,
-            self.asset.name,
-            "IQ"
+            "IQ_Protocol.docx"
         )
 
-        document.add_title_page()
-        document.add_document_information()
-        document.add_approval_table()
+    def generate(self):
+
+        document = self.create_document()
 
         document.add_section_heading("Purpose")
         document.add_paragraph(
-            "The purpose of this Installation Qualification (IQ) protocol is to verify "
-            "that the equipment has been installed according to approved specifications, "
-            "drawings, vendor documentation, and applicable GMP requirements."
+            "The purpose of this Installation Qualification (IQ) protocol "
+            "is to verify that the equipment has been installed according "
+            "to approved drawings, specifications, and manufacturer recommendations."
         )
 
         document.add_section_heading("Scope")
         document.add_paragraph(
-            "This protocol applies to the installation verification of the "
-            f"{self.asset.name} for the {self.project.name} project."
+            f"This protocol applies to the installation qualification of "
+            f"{self.asset.name}."
         )
 
         document.add_responsibilities_table()
@@ -53,4 +50,5 @@ class IQProtocolExporter:
         document.add_test_execution_table(checks)
 
         document.add_approval_table()
-        document.save("IQ_Protocol.docx")
+
+        self.save(document)

@@ -1,6 +1,9 @@
 from docx import Document
 from datetime import date
 
+from app.config.project_config import ProjectConfig
+from app.services.document_control import DocumentControl
+
 
 class WordDocumentExporter:
 
@@ -11,19 +14,26 @@ class WordDocumentExporter:
         self.document_type = document_type
         self.document = Document()
 
+        config = ProjectConfig()
+        control = DocumentControl(config)
+        self.document_control = control.build(document_type)
+
     def add_title_page(self):
         self.document.add_heading(self.title, level=0)
 
-        table = self.document.add_table(rows=6, cols=2)
+        table = self.document.add_table(rows=9, cols=2)
         table.style = "Table Grid"
 
         rows = [
-            ("Project", self.project_name),
+            ("Project", self.document_control["project"]),
             ("Asset", self.asset_name),
             ("Document Type", self.document_type),
-            ("Document Number", f"{self.document_type}-BSD-001"),
-            ("Revision", "0"),
-            ("Status", "Draft")
+            ("Document Number", self.document_control["document_number"]),
+            ("Revision", self.document_control["revision"]),
+            ("Status", self.document_control["status"]),
+            ("Prepared By", self.document_control["prepared_by"]),
+            ("Approved By", self.document_control["approved_by"]),
+            ("Date", self.document_control["date"])
         ]
 
         for row, values in zip(table.rows, rows):
@@ -35,16 +45,17 @@ class WordDocumentExporter:
     def add_document_information(self):
         self.document.add_heading("Document Information", level=1)
 
-        table = self.document.add_table(rows=7, cols=2)
+        table = self.document.add_table(rows=8, cols=2)
         table.style = "Table Grid"
 
         rows = [
             ("Document Title", self.title),
-            ("Project", self.project_name),
+            ("Project", self.document_control["project"]),
             ("Asset", self.asset_name),
-            ("Document Number", f"{self.document_type}-BSD-001"),
-            ("Revision", "0"),
-            ("Status", "Draft"),
+            ("Document Number", self.document_control["document_number"]),
+            ("Revision", self.document_control["revision"]),
+            ("Status", self.document_control["status"]),
+            ("Document Type", self.document_type),
             ("Date", str(date.today()))
         ]
 
@@ -66,10 +77,10 @@ class WordDocumentExporter:
 
         headers = ["Role", "Name", "Signature", "Date"]
         roles = [
-            "Validation Lead",
-            "Engineering",
+            "Prepared By",
+            "Reviewed By",
             "Quality Assurance",
-            "Operations"
+            "System Owner"
         ]
 
         for index, header in enumerate(headers):
@@ -100,13 +111,11 @@ class WordDocumentExporter:
         self.document.add_heading("Prerequisites", level=1)
 
         items = [
-            "FAT completed",
-            "SAT completed",
-            "IQ approved",
-            "Calibration current",
-            "SOP approved",
-            "Utilities available",
-            "Training complete"
+            "Approved requirements are available.",
+            "Applicable procedures are available.",
+            "Required personnel are trained.",
+            "Required equipment and instruments are available.",
+            "Safety requirements have been reviewed."
         ]
 
         for item in items:
@@ -128,10 +137,10 @@ class WordDocumentExporter:
             table.rows[0].cells[index].text = header
 
         equipment = [
-            ("Calibrated Pressure Gauge", "", "Yes"),
-            ("Temperature Logger", "", "Yes"),
-            ("Laptop / Engineering Workstation", "", "No"),
-            ("Approved SOP", "", "No")
+            ("Calibrated Instrument", "", "Yes"),
+            ("Data Logger / Recorder", "", "As Applicable"),
+            ("Computer / Workstation", "", "No"),
+            ("Approved Procedure", "", "No")
         ]
 
         for item in equipment:
@@ -144,20 +153,26 @@ class WordDocumentExporter:
         self.document.add_heading("Safety Precautions", level=1)
 
         items = [
-            "Follow applicable Lockout/Tagout procedures.",
+            "Follow applicable safety procedures.",
             "Wear required PPE.",
             "Do not bypass safety interlocks.",
-            "Report deviations immediately."
+            "Report deviations or unsafe conditions immediately."
         ]
 
         for item in items:
             self.document.add_paragraph(f"• {item}")
 
     def add_test_execution_table(self, procedure_steps):
-        table = self.document.add_table(rows=1, cols=4)
+        table = self.document.add_table(rows=1, cols=5)
         table.style = "Table Grid"
 
-        headers = ["Step", "Action", "Expected Result", "Actual Result"]
+        headers = [
+            "Step",
+            "Action",
+            "Expected Result",
+            "Actual Result",
+            "Pass / Fail"
+        ]
 
         for index, header in enumerate(headers):
             table.rows[0].cells[index].text = header
@@ -166,8 +181,9 @@ class WordDocumentExporter:
             row = table.add_row().cells
             row[0].text = str(index)
             row[1].text = step
-            row[2].text = "Verify result meets acceptance criteria."
+            row[2].text = "Result meets acceptance criteria."
             row[3].text = ""
+            row[4].text = ""
 
     def save(self, filename):
         self.document.save(filename)

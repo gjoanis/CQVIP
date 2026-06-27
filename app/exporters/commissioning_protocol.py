@@ -1,113 +1,47 @@
-from app.exporters.word_document import WordDocumentExporter
-from app.intelligence.requirement_engine import RequirementEngine
+from app.exporters.base_protocol import BaseProtocolExporter
 
 
-class CommissioningProtocolExporter:
+class CommissioningProtocolExporter(BaseProtocolExporter):
 
-    def __init__(self, project, asset, requirements):
-        self.project = project
-        self.asset = asset
-        self.requirements = requirements
+    def __init__(self, project, asset):
+
+        super().__init__(
+            project,
+            asset,
+            "Commissioning Protocol",
+            "Commissioning_Protocol.docx"
+        )
 
     def generate(self):
 
-        engine = RequirementEngine()
-
-        document = WordDocumentExporter(
-            "Commissioning Protocol",
-            self.project.name,
-            self.asset.name,
-            "Commissioning"
-        )
-
-        # ---------------------------------------------------
-        # Title Page
-        # ---------------------------------------------------
-
-        document.add_title_page()
-        document.add_document_information()
-        document.add_approval_table()
-
-        # ---------------------------------------------------
-        # Purpose
-        # ---------------------------------------------------
+        document = self.create_document()
 
         document.add_section_heading("Purpose")
-
         document.add_paragraph(
             "The purpose of this Commissioning Protocol is to verify "
-            "that the equipment has been installed correctly, utilities "
-            "are connected, safety systems function properly, and the "
-            "system is ready to enter qualification activities."
+            "that the equipment has been installed, connected, and started "
+            "up in a controlled manner prior to formal qualification."
         )
-
-        # ---------------------------------------------------
-        # Scope
-        # ---------------------------------------------------
-
-        document.add_section_heading("Scope")
-
-        document.add_paragraph(
-            f"This protocol applies to commissioning activities "
-            f"for the {self.asset.name}."
-        )
-
-        # ---------------------------------------------------
-        # Standard Sections
-        # ---------------------------------------------------
 
         document.add_responsibilities_table()
         document.add_prerequisites()
         document.add_equipment_required()
         document.add_safety_precautions()
 
-        # ---------------------------------------------------
-        # Commissioning Tests
-        # ---------------------------------------------------
-
         document.add_section_heading("Commissioning Verification")
 
-        for requirement in self.requirements:
+        checks = [
+            "Verify equipment installation is complete.",
+            "Verify utilities are available and connected.",
+            "Verify equipment startup can be performed safely.",
+            "Verify basic functional operation.",
+            "Verify alarms and safety devices.",
+            "Verify required documentation is available.",
+            "Verify system is ready for qualification."
+        ]
 
-            strategy = engine.analyze(requirement)
-
-            document.add_section_heading(requirement.req_id)
-
-            document.add_paragraph(
-                f"Requirement:\n{requirement.text}"
-            )
-
-            document.add_paragraph(
-                f"Objective:\n{strategy['objective']}"
-            )
-
-            document.add_paragraph("Verification Steps")
-
-            for step in strategy["procedure"]:
-                document.add_paragraph(f"- {step}")
-
-            document.add_test_execution_table(
-                strategy["procedure"]
-            )
-
-            document.add_paragraph("Acceptance Criteria")
-
-            for criterion in strategy["acceptance"]:
-                document.add_paragraph(f"• {criterion}")
-
-            document.add_paragraph("Required Evidence")
-
-            for evidence in strategy["evidence"]:
-                document.add_paragraph(f"• {evidence}")
-
-            document.add_paragraph(
-                f"Recommended Qualification Phase: {strategy['phase']}"
-            )
-
-        # ---------------------------------------------------
-        # Final Approval
-        # ---------------------------------------------------
+        document.add_test_execution_table(checks)
 
         document.add_approval_table()
 
-        document.save("Commissioning_Protocol.docx")
+        self.save(document)
