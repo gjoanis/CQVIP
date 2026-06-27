@@ -46,7 +46,7 @@ def get_dashboard_data():
         })
 
     return {
-        "requirements": requirement,
+        "requirements": requirements,
         "total_requirements": total_requirements,
         "critical_requirements": critical_requirements,
         "lifecycle": [
