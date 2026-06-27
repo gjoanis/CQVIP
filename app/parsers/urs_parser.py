@@ -1,9 +1,12 @@
+import re
+
 from app.models.requirement import Requirement
 
 
 class URSParser:
     """
     Extracts requirements from URS text.
+    Supports auto-numbered requirements and existing IDs like URS-001 or REQ-001.
     """
 
     def __init__(self, text):
@@ -51,6 +54,14 @@ class URSParser:
         else:
             return "Minor"
 
+    def extract_requirement_id(self, line, counter):
+        match = re.match(r"^(URS-\d+|REQ-\d+|FRS-\d+|DS-\d+)\s*[-:]*\s*(.*)", line)
+
+        if match:
+            return match.group(1), match.group(2)
+
+        return f"URS-{counter:03}", line
+
     def extract_requirements(self):
         requirements = []
         lines = self.text.split("\n")
@@ -59,14 +70,19 @@ class URSParser:
         for line in lines:
             line = line.strip()
 
-            if line.lower().startswith("the"):
-                category = self.categorize(line)
+            if not line:
+                continue
+
+            if "shall" in line.lower():
+                req_id, req_text = self.extract_requirement_id(line, counter)
+
+                category = self.categorize(req_text)
                 verification = self.recommend_verification(category)
                 criticality = self.assign_criticality(category)
 
                 requirement = Requirement(
-                    f"URS-{counter:03}",
-                    line,
+                    req_id,
+                    req_text,
                     category
                 )
 

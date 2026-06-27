@@ -13,8 +13,24 @@ from app.services.test_generator import TestGenerator
 from app.reports.dashboard import DashboardReport
 from app.reports.qualification_summary import QualificationSummaryReport
 
+from app.services.project_scanner import ProjectScanner
+from app.services.project_loader import ProjectLoader
 
 def main():
+    scanner = ProjectScanner("documents")
+    files = scanner.scan()
+
+    loader = ProjectLoader()
+    loaded_documents = loader.load_project(files)
+
+    print("\nDISCOVERED DOCUMENTS")
+    print("-" * 45)
+
+    for doc in loaded_documents:
+        print("Filename:", doc["filename"])
+        print("Type    :", doc["type"])
+        print("-" * 45)
+
     project = Project("BSD Expansion")
 
     washer = Asset(
