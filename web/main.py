@@ -35,7 +35,18 @@ def get_dashboard_data():
 
     return {
         "total_requirements": total_requirements,
-        "critical_requirements": critical_requirements
+        "critical_requirements": critical_requirements,
+        "lifecycle": [
+            {"stage": "URS", "status": "Complete"},
+            {"stage": "FAT", "status": "Complete"},
+            {"stage": "SAT", "status": "Complete"},
+            {"stage": "Commissioning", "status": "Complete"},
+            {"stage": "IQ", "status": "Complete"},
+            {"stage": "OQ", "status": "Complete"},
+            {"stage": "PQ", "status": "Complete"},
+            {"stage": "QSR", "status": "Complete"},
+            {"stage": "Released", "status": "Complete"}
+        ]
     }
 
 

@@ -21,7 +21,18 @@
             <h3>Total Requirements</h3>
             <p>{{ dashboard.total_requirements }}</p>
         </div>
+    <div class="section">
+        <h2>Qualification Lifecycle</h2>
 
+        <div class="lifecycle">
+            {% for item in dashboard.lifecycle %}
+                <div class="stage complete">
+                    <span>{{ item.stage }}</span>
+                    <small>{{ item.status }}</small>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
         <div class="card">
             <h3>Critical Requirements</h3>
             <p>{{ dashboard.critical_requirements }}</p>
