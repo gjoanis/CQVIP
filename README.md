@@ -1,24 +1,20 @@
 # CQVIP
+### Commissioning, Qualification & Validation Intelligence Platform
 
-## Commissioning, Qualification & Validation Intelligence Platform
-
-CQVIP is an AI-powered platform that accelerates Commissioning, Qualification, and Validation (CQV) activities for pharmaceutical and biotechnology facilities.
-
-The platform analyzes User Requirement Specifications (URS), extracts validation requirements, generates AI-driven recommendations, builds traceability matrices, and provides executive dashboards to improve inspection readiness.
+CQVIP is an AI-powered validation platform built for the pharmaceutical and biotechnology industries. It automates document analysis, requirement extraction, traceability generation, inspection readiness assessment, and qualification package creation.
 
 ---
 
 ## Features
 
-- AI Validation Intelligence
-- Executive KPI Dashboard
-- AI Gap Analysis
-- AI Recommendations
-- Requirements Traceability
-- Qualification Lifecycle Dashboard
+- AI Requirement Extraction
+- Automated Traceability Matrix
+- Executive Validation Dashboard
 - Inspection Readiness Scoring
+- AI Gap Analysis
+- Validation Recommendations
+- Qualification Lifecycle Tracking
 - Interactive Charts
-- Automatic URS Parsing
 - Validation Package Generation
 
 ---
@@ -34,18 +30,19 @@ The platform analyzes User Requirement Specifications (URS), extracts validation
 
 ---
 
-## Current Status
+## Dashboard
 
-Prototype Version 1.0
-
-Future enhancements include:
-
-- Large Language Model (LLM) integration
-- Automated protocol generation
-- Risk scoring engine
-- Portfolio management dashboard
-- FDA inspection assistant
+*Dashboard screenshots coming soon.*
 
 ---
 
-Developed by **Gary Joanis**
+## Vision
+
+CQVIP is being developed to reduce validation effort, improve inspection readiness, and accelerate GMP project delivery through artificial intelligence.
+
+---
+
+## Status
+
+🚧 Active Development
+
