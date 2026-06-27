@@ -220,3 +220,18 @@ tr:hover {
     font-size:24px;
     cursor:pointer;
 }
+
+.details-header button {
+    background: #e5e7eb;
+    color: #111827;
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.details-header button:hover {
+    background: #cbd5e1;
+}

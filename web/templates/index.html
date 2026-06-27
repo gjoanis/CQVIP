@@ -123,8 +123,8 @@
                         data-criticality="{{ requirement.criticality }}"
                         data-phase="{{ requirement.recommended }}"
                         data-status="{{ 'Verified' if requirement.verified else 'Open' }}"
-                        onclick="showRequirementDetails(this)"
-                    >
+                        onclick="showRequirementDetails(this)">
+                </tr>
                         <td>{{ requirement.req_id }}</td>
                         <td>{{ requirement.text }}</td>
                         <td>{{ requirement.category }}</td>
