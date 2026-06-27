@@ -71,13 +71,28 @@
     <div class="section">
         <h2>Requirements Traceability</h2>
 
-        <input
-            type="text"
-            id="requirementSearch"
-            placeholder="Search requirements..."
-            onkeyup="filterRequirements()"
-            class="search-box"
-        >
+        <div class="filter-row">
+            <input
+                    type="text"
+                    id="requirementSearch"
+                    placeholder="Search requirements..."
+                    onkeyup="filterRequirements()"
+                    class="search-box"
+            >
+
+    <select id="criticalityFilter" onchange="filterRequirements()" class="filter-select">
+        <option value="">All Criticalities</option>
+        <option value="critical">Critical</option>
+        <option value="major">Major</option>
+        <option value="minor">Minor</option>
+    </select>
+
+    <select id="statusFilter" onchange="filterRequirements()" class="filter-select">
+        <option value="">All Statuses</option>
+        <option value="verified">Verified</option>
+        <option value="open">Open</option>
+    </select>
+</div>
 
         <table id="requirementsTable">
             <thead>
@@ -143,17 +158,24 @@
 
 </div>
 
+
 <script>
 function filterRequirements() {
-    let input = document.getElementById("requirementSearch");
-    let filter = input.value.toLowerCase();
+    let searchInput = document.getElementById("requirementSearch").value.toLowerCase();
+    let criticalityFilter = document.getElementById("criticalityFilter").value.toLowerCase();
+    let statusFilter = document.getElementById("statusFilter").value.toLowerCase();
+
     let table = document.getElementById("requirementsTable");
     let rows = table.getElementsByTagName("tr");
 
     for (let i = 1; i < rows.length; i++) {
         let rowText = rows[i].innerText.toLowerCase();
 
-        if (rowText.includes(filter)) {
+        let matchesSearch = rowText.includes(searchInput);
+        let matchesCriticality = criticalityFilter === "" || rowText.includes(criticalityFilter);
+        let matchesStatus = statusFilter === "" || rowText.includes(statusFilter);
+
+        if (matchesSearch && matchesCriticality && matchesStatus) {
             rows[i].style.display = "";
         } else {
             rows[i].style.display = "none";
