@@ -23,10 +23,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    files = os.listdir(UPLOAD_FOLDER)
+
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={}
+        context={
+            "files": files
+        }
     )
 
 
@@ -41,6 +45,13 @@ def upload_page(request: Request):
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
+
+    for existing_file in os.listdir(UPLOAD_FOLDER):
+        existing_path = os.path.join(UPLOAD_FOLDER, existing_file)
+
+        if os.path.isfile(existing_path):
+            os.remove(existing_path)
+
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
 
     with open(filepath, "wb") as buffer:

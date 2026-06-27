@@ -22,6 +22,20 @@
 
     <hr>
 
+    <h3>Uploaded Documents</h3>
+
+    {% if files %}
+        <ul>
+            {% for file in files %}
+                <li>{{ file }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No documents uploaded.</p>
+    {% endif %}
+
+    <hr>
+
     <a href="/upload">
         <button>Upload URS</button>
     </a>
