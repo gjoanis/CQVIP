@@ -198,20 +198,43 @@ function filterRequirements() {
         rows[i].style.display = matchesSearch && matchesCriticality && matchesStatus ? "" : "none";
     }
 }
-
 function showRequirementDetails(row) {
-    let details = document.getElementById("requirementDetails");
+    document.getElementById("detailID").innerText = row.dataset.id;
+    document.getElementById("detailText").innerText = row.dataset.text;
+    document.getElementById("detailCategory").innerText = row.dataset.category;
+    document.getElementById("detailCriticality").innerText = row.dataset.criticality;
+    document.getElementById("detailPhase").innerText = row.dataset.phase;
+    document.getElementById("detailStatus").innerText = row.dataset.status;
 
-    details.innerHTML = `
-        <h3>${row.dataset.id}</h3>
-        <p><strong>Requirement:</strong> ${row.dataset.text}</p>
-        <p><strong>Category:</strong> ${row.dataset.category}</p>
-        <p><strong>Criticality:</strong> ${row.dataset.criticality}</p>
-        <p><strong>Recommended Phase:</strong> ${row.dataset.phase}</p>
-        <p><strong>Status:</strong> ${row.dataset.status}</p>
-    `;
+    document.getElementById("detailsPanel").classList.add("open");
 }
+
+function closeDetails() {
+    document.getElementById("detailsPanel").classList.remove("open");
+}
+
 </script>
 
+<div id="detailsPanel" class="details-panel">
+
+    <div class="details-header">
+        <h2>Requirement Details</h2>
+        <button onclick="closeDetails()">✕</button>
+    </div>
+
+    <p><strong>ID:</strong> <span id="detailID"></span></p>
+
+    <p><strong>Description:</strong></p>
+    <p id="detailText"></p>
+
+    <p><strong>Category:</strong> <span id="detailCategory"></span></p>
+
+    <p><strong>Criticality:</strong> <span id="detailCriticality"></span></p>
+
+    <p><strong>Recommended Phase:</strong> <span id="detailPhase"></span></p>
+
+    <p><strong>Status:</strong> <span id="detailStatus"></span></p>
+
+</div>
 </body>
 </html>
