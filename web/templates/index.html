@@ -53,38 +53,67 @@
 
     </div>
 
-    <div class="section">
-        <h2>AI Project Summary</h2>
+   <div class="section">
 
-        <div class="ai-summary">
-            <h3>{{ dashboard.ai_summary.health }}</h3>
-            <p>{{ dashboard.ai_summary.summary }}</p>
-            <p>
-                <strong>Risk Level:</strong>
-                {{ dashboard.ai_summary.risk_level }}
-            </p>
+    <h2>🤖 AI Insights</h2>
+
+    <div class="ai-grid">
+
+        <div class="ai-card">
+
+            <h3>Project Summary</h3>
+
+            <div class="summary-box">
+                <strong>{{ dashboard.ai_summary.health }}</strong><br><br>
+
+                {{ dashboard.ai_summary.summary }}
+
+                <br><br>
+
+                <strong>
+                    Risk Level:
+                    {{ dashboard.ai_summary.risk }}
+                </strong>
+
+            </div>
+
         </div>
-    </div>
 
-    <div class="section">
-        <h2>AI Gap Analysis</h2>
+        <div class="ai-card">
 
-        <ul>
-            {% for gap in dashboard.ai_gap_analysis %}
+            <h3>Gap Analysis</h3>
+
+            <ul>
+
+            {% for gap in dashboard.ai_gaps %}
+
                 <li>{{ gap }}</li>
+
             {% endfor %}
-        </ul>
-    </div>
 
-    <div class="section">
-        <h2>AI Recommendations</h2>
+            </ul>
 
-        <ul>
+        </div>
+
+        <div class="ai-card">
+
+            <h3>Recommendations</h3>
+
+            <ul>
+
             {% for recommendation in dashboard.ai_recommendations %}
+
                 <li>{{ recommendation }}</li>
+
             {% endfor %}
-        </ul>
+
+            </ul>
+
+        </div>
+
     </div>
+
+</div>
 
     <div class="section">
         <h2>Executive Charts</h2>
