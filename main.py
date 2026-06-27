@@ -17,7 +17,6 @@ from app.reports.dashboard import DashboardReport
 from app.reports.qualification_summary import QualificationSummaryReport
 from app.exporters.excel_trace_matrix import ExcelTraceMatrix
 
-
 def main():
     project = Project("BSD Expansion")
 
