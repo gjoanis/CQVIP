@@ -312,3 +312,49 @@ button:hover {
         font-size: 12px;
     }
 }
+
+.ai-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.ai-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+
+.ai-card h3 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    color: #111827;
+    font-size: 18px;
+}
+
+.summary-box {
+    border-left: 5px solid #2563eb;
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 10px;
+    line-height: 1.5;
+}
+
+.ai-card ul {
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+
+.ai-card li {
+    margin-bottom: 10px;
+    line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+    .ai-grid {
+        grid-template-columns: 1fr;
+    }
+}
