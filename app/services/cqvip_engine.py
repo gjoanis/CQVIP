@@ -1,3 +1,5 @@
+import os
+
 from app.config.project_config import ProjectConfig
 
 from app.models.project import Project
@@ -34,18 +36,12 @@ class CQVIPEngine:
     def __init__(self, documents_folder="documents"):
         self.config = ProjectConfig()
         self.documents_folder = documents_folder
+        self.reset_project()
 
-        self.project = Project(
-            self.config.PROJECT_NAME
-        )
-
-        self.asset = Asset(
-            self.config.ASSET_NAME,
-            self.config.ASSET_TYPE
-        )
-
+    def reset_project(self):
+        self.project = Project(self.config.PROJECT_NAME)
+        self.asset = Asset(self.config.ASSET_NAME, self.config.ASSET_TYPE)
         self.requirements = []
-
         self.qualification_engine = QualificationEngine()
 
     def load_documents(self):
@@ -55,6 +51,23 @@ class CQVIPEngine:
         loader = ProjectLoader()
         loaded_documents = loader.load_project(files)
 
+        self._load_parsed_documents(loaded_documents)
+
+    def load_single_document(self, filepath):
+        loader = ProjectLoader()
+
+        loaded_documents = loader.load_project(
+            [
+                {
+                    "path": filepath,
+                    "filename": os.path.basename(filepath)
+                }
+            ]
+        )
+
+        self._load_parsed_documents(loaded_documents)
+
+    def _load_parsed_documents(self, loaded_documents):
         print("\nDISCOVERED DOCUMENTS")
         print("-" * 45)
 
@@ -192,7 +205,15 @@ class CQVIPEngine:
         inspection.check_readiness()
 
     def run(self):
+        self.reset_project()
         self.load_documents()
+        self.complete_lifecycle()
+        self.generate_documents()
+        self.display_reports()
+
+    def run_for_file(self, filepath):
+        self.reset_project()
+        self.load_single_document(filepath)
         self.complete_lifecycle()
         self.generate_documents()
         self.display_reports()

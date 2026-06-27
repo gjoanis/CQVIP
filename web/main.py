@@ -21,15 +21,36 @@ PACKAGE_ZIP = "exports/Validation_Package.zip"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
+def get_dashboard_data():
+    engine = CQVIPEngine()
+    engine.load_documents()
+
+    total_requirements = len(engine.requirements)
+
+    critical_requirements = 0
+
+    for requirement in engine.requirements:
+        if requirement.criticality == "Critical":
+            critical_requirements += 1
+
+    return {
+        "total_requirements": total_requirements,
+        "critical_requirements": critical_requirements
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     files = os.listdir(UPLOAD_FOLDER)
+
+    dashboard = get_dashboard_data()
 
     return templates.TemplateResponse(
         request=request,
         name="index.html",
         context={
-            "files": files
+            "files": files,
+            "dashboard": dashboard
         }
     )
 
