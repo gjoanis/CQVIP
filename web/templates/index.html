@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>CQVIP</title>
     <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -17,6 +19,7 @@
 <div class="container">
 
     <div class="card-grid">
+
         <div class="card">
             <h3>Total Requirements</h3>
             <p>{{ dashboard.total_requirements }}</p>
@@ -46,6 +49,61 @@
         <div class="card">
             <h3>Asset</h3>
             <p style="font-size:18px;">Decontamination Washer</p>
+        </div>
+
+    </div>
+
+    <div class="section">
+        <h2>AI Project Summary</h2>
+
+        <div class="ai-summary">
+            <h3>{{ dashboard.ai_summary.health }}</h3>
+            <p>{{ dashboard.ai_summary.summary }}</p>
+            <p>
+                <strong>Risk Level:</strong>
+                {{ dashboard.ai_summary.risk_level }}
+            </p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>AI Gap Analysis</h2>
+
+        <ul>
+            {% for gap in dashboard.ai_gap_analysis %}
+                <li>{{ gap }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>AI Recommendations</h2>
+
+        <ul>
+            {% for recommendation in dashboard.ai_recommendations %}
+                <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Executive Charts</h2>
+
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>Requirements by Phase</h3>
+                <canvas id="phaseChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Requirements by Criticality</h3>
+                <canvas id="criticalityChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Requirements by Category</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -194,41 +252,144 @@
 </div>
 
 <script>
+
 function filterRequirements() {
-    let searchInput = document.getElementById("requirementSearch").value.toLowerCase();
-    let criticalityFilter = document.getElementById("criticalityFilter").value.toLowerCase();
-    let statusFilter = document.getElementById("statusFilter").value.toLowerCase();
+
+    let search = document
+        .getElementById("requirementSearch")
+        .value
+        .toLowerCase();
+
+    let criticality = document
+        .getElementById("criticalityFilter")
+        .value
+        .toLowerCase();
+
+    let status = document
+        .getElementById("statusFilter")
+        .value
+        .toLowerCase();
 
     let table = document.getElementById("requirementsTable");
     let rows = table.getElementsByTagName("tr");
 
     for (let i = 1; i < rows.length; i++) {
-        let rowText = rows[i].innerText.toLowerCase();
 
-        let matchesSearch = rowText.includes(searchInput);
-        let matchesCriticality = criticalityFilter === "" || rowText.includes(criticalityFilter);
-        let matchesStatus = statusFilter === "" || rowText.includes(statusFilter);
+        let text = rows[i].innerText.toLowerCase();
+
+        let matchesSearch =
+            text.includes(search);
+
+        let matchesCriticality =
+            criticality === "" ||
+            text.includes(criticality);
+
+        let matchesStatus =
+            status === "" ||
+            text.includes(status);
 
         rows[i].style.display =
-            matchesSearch && matchesCriticality && matchesStatus ? "" : "none";
+            matchesSearch &&
+            matchesCriticality &&
+            matchesStatus
+            ? ""
+            : "none";
     }
+
 }
 
 function showRequirementDetails(row) {
-    document.getElementById("detailID").innerText = row.dataset.id;
-    document.getElementById("detailText").innerText = row.dataset.text;
-    document.getElementById("detailCategory").innerText = row.dataset.category;
-    document.getElementById("detailCriticality").innerText = row.dataset.criticality;
-    document.getElementById("detailPhase").innerText = row.dataset.phase;
-    document.getElementById("detailStatus").innerText = row.dataset.status;
 
-    document.getElementById("detailsPanel").classList.add("open");
+    document.getElementById("detailID").innerText =
+        row.dataset.id;
+
+    document.getElementById("detailText").innerText =
+        row.dataset.text;
+
+    document.getElementById("detailCategory").innerText =
+        row.dataset.category;
+
+    document.getElementById("detailCriticality").innerText =
+        row.dataset.criticality;
+
+    document.getElementById("detailPhase").innerText =
+        row.dataset.phase;
+
+    document.getElementById("detailStatus").innerText =
+        row.dataset.status;
+
+    document
+        .getElementById("detailsPanel")
+        .classList
+        .add("open");
+
 }
 
 function closeDetails() {
-    document.getElementById("detailsPanel").classList.remove("open");
+
+    document
+        .getElementById("detailsPanel")
+        .classList
+        .remove("open");
+
 }
+
+const phaseChart = new Chart(
+    document.getElementById("phaseChart"),
+    {
+        type: "bar",
+        data: {
+            labels: {{ dashboard.charts.phase_labels | tojson }},
+            datasets: [{
+                label: "Requirements",
+                data: {{ dashboard.charts.phase_values | tojson }}
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    }
+);
+
+const criticalityChart = new Chart(
+    document.getElementById("criticalityChart"),
+    {
+        type: "pie",
+        data: {
+            labels: {{ dashboard.charts.criticality_labels | tojson }},
+            datasets: [{
+                data: {{ dashboard.charts.criticality_values | tojson }}
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    }
+);
+
+const categoryChart = new Chart(
+    document.getElementById("categoryChart"),
+    {
+        type: "doughnut",
+        data: {
+            labels: {{ dashboard.charts.category_labels | tojson }},
+            datasets: [{
+                data: {{ dashboard.charts.category_values | tojson }}
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    }
+);
+
 </script>
 
 </body>
+
 </html>
