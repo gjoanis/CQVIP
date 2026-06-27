@@ -1,36 +1,24 @@
+from app.exporters.oq_protocol import OQProtocolExporter
+
 from app.models.project import Project
 from app.models.asset import Asset
 from app.models.document import Document
 
-from app.parsers.document_loader import DocumentLoader
 from app.parsers.urs_parser import URSParser
 
 from app.services.qualification_engine import QualificationEngine
 from app.services.traceability import TraceabilityService
 from app.services.inspection import InspectionService
 from app.services.test_generator import TestGenerator
-
-from app.reports.dashboard import DashboardReport
-from app.reports.qualification_summary import QualificationSummaryReport
-
 from app.services.project_scanner import ProjectScanner
 from app.services.project_loader import ProjectLoader
 
+from app.reports.dashboard import DashboardReport
+from app.reports.qualification_summary import QualificationSummaryReport
+from app.exporters.excel_trace_matrix import ExcelTraceMatrix
+
+
 def main():
-    scanner = ProjectScanner("documents")
-    files = scanner.scan()
-
-    loader = ProjectLoader()
-    loaded_documents = loader.load_project(files)
-
-    print("\nDISCOVERED DOCUMENTS")
-    print("-" * 45)
-
-    for doc in loaded_documents:
-        print("Filename:", doc["filename"])
-        print("Type    :", doc["type"])
-        print("-" * 45)
-
     project = Project("BSD Expansion")
 
     washer = Asset(
@@ -38,26 +26,43 @@ def main():
         "Equipment"
     )
 
-    urs = Document(
-        "URS - Decontamination Washer",
-        "URS"
-    )
+    scanner = ProjectScanner("documents")
+    files = scanner.scan()
 
-    loader = DocumentLoader()
-    urs_text = loader.load_docx("documents/sample_urs.docx")
+    project_loader = ProjectLoader()
+    loaded_documents = project_loader.load_project(files)
 
-    parser = URSParser(urs_text)
-    requirements = parser.extract_requirements()
+    print("\nDISCOVERED DOCUMENTS")
+    print("-" * 45)
 
-    for requirement in requirements:
-        urs.add_requirement(requirement)
+    requirements = []
+    urs = None
 
-    requirements[0].mark_verified("OQ-001")
-    requirements[0].add_trace_link("FAT-001")
-    requirements[0].add_trace_link("SAT-001")
-    requirements[0].add_trace_link("IQ-001")
+    for loaded_doc in loaded_documents:
+        print("Filename:", loaded_doc["filename"])
+        print("Type    :", loaded_doc["type"])
+        print("-" * 45)
 
-    washer.add_document(urs)
+        if loaded_doc["type"] == "URS":
+            urs = Document(
+                loaded_doc["filename"],
+                "URS"
+            )
+
+            parser = URSParser(loaded_doc["text"])
+            requirements = parser.extract_requirements()
+
+            for requirement in requirements:
+                urs.add_requirement(requirement)
+
+            washer.add_document(urs)
+
+    if requirements:
+        requirements[0].mark_verified("OQ-001")
+        requirements[0].add_trace_link("FAT-001")
+        requirements[0].add_trace_link("SAT-001")
+        requirements[0].add_trace_link("IQ-001")
+
     project.add_asset(washer)
 
     qualification_engine = QualificationEngine()
@@ -83,6 +88,17 @@ def main():
     )
 
     test_generator.generate_tests()
+
+    excel = ExcelTraceMatrix(requirements)
+    excel.export()
+
+    oq = OQProtocolExporter(
+        project,
+        washer,
+        requirements
+    )
+
+    oq.generate()
 
     dashboard.display()
     qualification_engine.display_dashboard()
