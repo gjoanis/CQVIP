@@ -1,440 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>CQVIP</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CQVIP | AI Validation Intelligence</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #111827;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 24px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: #2563eb;
+    }
+
+    nav a {
+      margin-left: 24px;
+      text-decoration: none;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    .hero {
+      padding: 90px 8% 60px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: #4b5563;
+      margin-bottom: 32px;
+    }
+
+    .buttons a {
+      display: inline-block;
+      padding: 14px 22px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      margin-right: 12px;
+    }
+
+    .primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .secondary {
+      background: white;
+      color: #2563eb;
+      border: 1px solid #cbd5e1;
+    }
+
+    .mockup {
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    }
+
+    .mockup img {
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    .stats {
+      padding: 40px 8%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .stat {
+      background: white;
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .stat h2 {
+      font-size: 36px;
+      color: #2563eb;
+    }
+
+    .section {
+      padding: 70px 8%;
+    }
+
+    .section h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 28px;
+    }
+
+    .card {
+      background: white;
+      padding: 26px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      color: #111827;
+    }
+
+    .card p {
+      color: #4b5563;
+    }
+
+    .dashboard img {
+      width: 100%;
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+      margin-top: 24px;
+    }
+
+    footer {
+      padding: 40px 8%;
+      text-align: center;
+      color: #6b7280;
+      border-top: 1px solid #e5e7eb;
+      background: white;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .stats,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 42px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <header>
+    <div class="logo">CQVIP</div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#workflow">Workflow</a>
+      <a href="https://github.com/gjoanis/CQVIP">GitHub</a>
+    </nav>
+  </header>
 
-<div class="header">
-    <h1>CQVIP</h1>
-    <p>Commissioning, Qualification & Validation Intelligence Platform</p>
-</div>
-
-<div class="container">
-
-    <div class="card-grid">
-
-        <div class="card">
-            <h3>Total Requirements</h3>
-            <p>{{ dashboard.total_requirements }}</p>
-        </div>
-
-        <div class="card">
-            <h3>Critical Requirements</h3>
-            <p>{{ dashboard.critical_requirements }}</p>
-        </div>
-
-        <div class="card">
-            <h3>Open Requirements</h3>
-            <p>{{ dashboard.open_requirements }}</p>
-        </div>
-
-        <div class="card">
-            <h3>Inspection Readiness</h3>
-            <p>{{ dashboard.readiness_score }}%</p>
-            <small>{{ dashboard.readiness_status }}</small>
-        </div>
-
-        <div class="card">
-            <h3>Project</h3>
-            <p style="font-size:18px;">CQVIP Demonstration</p>
-        </div>
-
-        <div class="card">
-            <h3>Asset</h3>
-            <p style="font-size:18px;">Decontamination Washer</p>
-        </div>
-
+  <section class="hero">
+    <div>
+      <h1>AI-Powered Commissioning, Qualification & Validation</h1>
+      <p>
+        CQVIP helps pharmaceutical and biotech teams automate requirements extraction,
+        traceability, gap analysis, and inspection readiness.
+      </p>
+      <div class="buttons">
+        <a class="primary" href="#dashboard">View Dashboard</a>
+        <a class="secondary" href="https://github.com/gjoanis/CQVIP">View GitHub</a>
+      </div>
     </div>
 
-   <div class="section">
-
-    <h2>🤖 AI Validation Intelligence</h2>
-
-    <div class="ai-grid">
-
-        <div class="ai-card">
-
-            <h3>Project Summary</h3>
-
-            <div class="summary-box">
-                <strong>{{ dashboard.ai_summary.health }}</strong><br><br>
-
-                {{ dashboard.ai_summary.summary }}
-
-                <br><br>
-
-                <strong>
-                    Risk Level:
-                    {{ dashboard.ai_summary.risk_level }}
-                </strong>
-
-            </div>
-
-        </div>
-
-        <div class="ai-card">
-
-            <h3>Gap Analysis</h3>
-
-            <ul>
-
-            {% for gap in dashboard.ai_gap_analysis %}
-
-                <li>{{ gap }}</li>
-
-            {% endfor %}
-
-            </ul>
-
-        </div>
-
-        <div class="ai-card">
-
-            <h3>Recommendations</h3>
-
-            <ul>
-
-            {% for recommendation in dashboard.ai_recommendations %}
-
-                <li>{{ recommendation }}</li>
-
-            {% endfor %}
-
-            </ul>
-
-        </div>
-
+    <div class="mockup">
+      <img src="screenshots/dashboard.png" alt="CQVIP Dashboard">
     </div>
+  </section>
 
-</div>
-
-    <div class="section">
-        <h2>Executive Charts</h2>
-
-        <div class="chart-grid">
-            <div class="chart-card">
-                <h3>Requirements by Phase</h3>
-                <canvas id="phaseChart"></canvas>
-            </div>
-
-            <div class="chart-card">
-                <h3>Requirements by Criticality</h3>
-                <canvas id="criticalityChart"></canvas>
-            </div>
-
-            <div class="chart-card">
-                <h3>Requirements by Category</h3>
-                <canvas id="categoryChart"></canvas>
-            </div>
-        </div>
+  <section class="stats">
+    <div class="stat">
+      <h2>80%</h2>
+      <p>Less documentation effort</p>
     </div>
-
-    <div class="section">
-        <h2>Qualification Lifecycle</h2>
-
-        <div class="lifecycle">
-            {% for item in dashboard.lifecycle %}
-                <div class="stage complete">
-                    <span>{{ item.stage }}</span>
-                    <small>{{ item.status }}</small>
-                </div>
-            {% endfor %}
-        </div>
+    <div class="stat">
+      <h2>95%</h2>
+      <p>Traceability coverage</p>
     </div>
-
-    <div class="section">
-        <h2>Uploaded Documents</h2>
-
-        {% if files %}
-            <ul>
-                {% for file in files %}
-                    <li>{{ file }}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No documents uploaded.</p>
-        {% endif %}
+    <div class="stat">
+      <h2>50%</h2>
+      <p>Faster qualification</p>
     </div>
-
-    <div class="section">
-        <h2>Requirements Traceability</h2>
-
-        <div class="filter-row">
-            <input
-                type="text"
-                id="requirementSearch"
-                placeholder="Search requirements..."
-                onkeyup="filterRequirements()"
-                class="search-box"
-            >
-
-            <select id="criticalityFilter" onchange="filterRequirements()" class="filter-select">
-                <option value="">All Criticalities</option>
-                <option value="critical">Critical</option>
-                <option value="major">Major</option>
-                <option value="minor">Minor</option>
-            </select>
-
-            <select id="statusFilter" onchange="filterRequirements()" class="filter-select">
-                <option value="">All Statuses</option>
-                <option value="verified">Verified</option>
-                <option value="open">Open</option>
-            </select>
-        </div>
-
-        <table id="requirementsTable">
-            <thead>
-                <tr>
-                    <th>Requirement ID</th>
-                    <th>Requirement</th>
-                    <th>Category</th>
-                    <th>Criticality</th>
-                    <th>Recommended Phase</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for requirement in dashboard.requirements %}
-                    <tr
-                        data-id="{{ requirement.req_id }}"
-                        data-text="{{ requirement.text }}"
-                        data-category="{{ requirement.category }}"
-                        data-criticality="{{ requirement.criticality }}"
-                        data-phase="{{ requirement.recommended }}"
-                        data-status="{{ 'Verified' if requirement.verified else 'Open' }}"
-                        onclick="showRequirementDetails(this)"
-                    >
-                        <td>{{ requirement.req_id }}</td>
-                        <td>{{ requirement.text }}</td>
-                        <td>{{ requirement.category }}</td>
-
-                        <td>
-                            <span class="badge {{ requirement.criticality | lower }}">
-                                {{ requirement.criticality }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="phase">
-                                {{ requirement.recommended }}
-                            </span>
-                        </td>
-
-                        <td>
-                            {% if requirement.verified %}
-                                <span class="badge verified">Verified</span>
-                            {% else %}
-                                <span class="badge open">Open</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="stat">
+      <h2>AI</h2>
+      <p>Inspection intelligence</p>
     </div>
+  </section>
 
-    <div class="section">
-        <h2>Actions</h2>
+  <section id="features" class="section">
+    <h2>Built for GMP validation teams</h2>
 
-        <div class="actions">
-            <a href="/upload">
-                <button>Upload URS</button>
-            </a>
+    <div class="cards">
+      <div class="card">
+        <h3>AI Requirement Extraction</h3>
+        <p>Extract validation requirements from URS documents automatically.</p>
+      </div>
 
-            <form action="/generate-package" method="post">
-                <button type="submit">Generate Validation Package</button>
-            </form>
+      <div class="card">
+        <h3>Traceability Matrix</h3>
+        <p>Link requirements to qualification phases, evidence, and status.</p>
+      </div>
 
-            <a href="/download">
-                <button>Download Latest Package</button>
-            </a>
-        </div>
+      <div class="card">
+        <h3>Inspection Readiness</h3>
+        <p>Surface open risks, gaps, and missing objective evidence.</p>
+      </div>
     </div>
+  </section>
 
-</div>
+  <section id="dashboard" class="section dashboard">
+    <h2>Executive Validation Dashboard</h2>
+    <p>Real-time visibility into requirements, criticality, lifecycle status, and AI recommendations.</p>
+    <img src="screenshots/executive.png" alt="CQVIP Executive Dashboard">
+  </section>
 
-<div id="detailsPanel" class="details-panel">
+  <section id="workflow" class="section">
+    <h2>AI Validation Workflow</h2>
 
-    <div class="details-header">
-        <h2>Requirement Details</h2>
-        <button type="button" onclick="closeDetails()">×</button>
+    <div class="cards">
+      <div class="card">
+        <h3>1. Upload URS</h3>
+        <p>Import validation documentation and requirements.</p>
+      </div>
+
+      <div class="card">
+        <h3>2. Analyze Gaps</h3>
+        <p>AI identifies open items, risks, and missing verification evidence.</p>
+      </div>
+
+      <div class="card">
+        <h3>3. Generate Package</h3>
+        <p>Create validation-ready outputs for CQV execution.</p>
+      </div>
     </div>
+  </section>
 
-    <p><strong>ID:</strong> <span id="detailID"></span></p>
-
-    <p><strong>Description:</strong></p>
-    <p id="detailText"></p>
-
-    <p><strong>Category:</strong> <span id="detailCategory"></span></p>
-    <p><strong>Criticality:</strong> <span id="detailCriticality"></span></p>
-    <p><strong>Recommended Phase:</strong> <span id="detailPhase"></span></p>
-    <p><strong>Status:</strong> <span id="detailStatus"></span></p>
-
-</div>
-
-<script>
-
-function filterRequirements() {
-
-    let search = document
-        .getElementById("requirementSearch")
-        .value
-        .toLowerCase();
-
-    let criticality = document
-        .getElementById("criticalityFilter")
-        .value
-        .toLowerCase();
-
-    let status = document
-        .getElementById("statusFilter")
-        .value
-        .toLowerCase();
-
-    let table = document.getElementById("requirementsTable");
-    let rows = table.getElementsByTagName("tr");
-
-    for (let i = 1; i < rows.length; i++) {
-
-        let text = rows[i].innerText.toLowerCase();
-
-        let matchesSearch =
-            text.includes(search);
-
-        let matchesCriticality =
-            criticality === "" ||
-            text.includes(criticality);
-
-        let matchesStatus =
-            status === "" ||
-            text.includes(status);
-
-        rows[i].style.display =
-            matchesSearch &&
-            matchesCriticality &&
-            matchesStatus
-            ? ""
-            : "none";
-    }
-
-}
-
-function showRequirementDetails(row) {
-
-    document.getElementById("detailID").innerText =
-        row.dataset.id;
-
-    document.getElementById("detailText").innerText =
-        row.dataset.text;
-
-    document.getElementById("detailCategory").innerText =
-        row.dataset.category;
-
-    document.getElementById("detailCriticality").innerText =
-        row.dataset.criticality;
-
-    document.getElementById("detailPhase").innerText =
-        row.dataset.phase;
-
-    document.getElementById("detailStatus").innerText =
-        row.dataset.status;
-
-    document
-        .getElementById("detailsPanel")
-        .classList
-        .add("open");
-
-}
-
-function closeDetails() {
-
-    document
-        .getElementById("detailsPanel")
-        .classList
-        .remove("open");
-
-}
-
-const phaseChart = new Chart(
-    document.getElementById("phaseChart"),
-    {
-        type: "bar",
-        data: {
-            labels: {{ dashboard.charts.phase_labels | tojson }},
-            datasets: [{
-                label: "Requirements",
-                data: {{ dashboard.charts.phase_values | tojson }}
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    }
-);
-
-const criticalityChart = new Chart(
-    document.getElementById("criticalityChart"),
-    {
-        type: "pie",
-        data: {
-            labels: {{ dashboard.charts.criticality_labels | tojson }},
-            datasets: [{
-                data: {{ dashboard.charts.criticality_values | tojson }}
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    }
-);
-
-const categoryChart = new Chart(
-    document.getElementById("categoryChart"),
-    {
-        type: "doughnut",
-        data: {
-            labels: {{ dashboard.charts.category_labels | tojson }},
-            datasets: [{
-                data: {{ dashboard.charts.category_values | tojson }}
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    }
-);
-
-</script>
-<footer class="footer">
-    <div class="footer-content">
-        <h3>CQVIP Version 1.0</h3>
-
-        <p>
-            Commissioning, Qualification & Validation Intelligence Platform
-        </p>
-
-        <p>
-            AI-Assisted Validation | Requirements Traceability | Package Generation
-        </p>
-
-        <p class="copyright">
-            © 2026 Gary Joanis • Built with Python, FastAPI & Jinja2
-        </p>
-    </div>
-</footer>
+  <footer>
+    CQVIP — Commissioning, Qualification & Validation Intelligence Platform
+  </footer>
 </body>
-
 </html>
