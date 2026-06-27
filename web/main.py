@@ -1,17 +1,12 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, FileResponse
+import os
+import shutil
+
+from fastapi import FastAPI, Request, UploadFile, File
+from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.services.cqvip_engine import CQVIPEngine
-
-from fastapi import UploadFile, File
-import shutil
-import os
-
-UPLOAD_FOLDER = "documents"
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 app = FastAPI(title="CQVIP")
@@ -19,6 +14,11 @@ app = FastAPI(title="CQVIP")
 templates = Jinja2Templates(directory="web/templates")
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
+
+UPLOAD_FOLDER = "documents"
+PACKAGE_ZIP = "exports/Validation_Package.zip"
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -30,34 +30,44 @@ def home(request: Request):
     )
 
 
+@app.get("/upload", response_class=HTMLResponse)
+def upload_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="upload.html",
+        context={}
+    )
+
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return RedirectResponse(
+        url="/",
+        status_code=303
+    )
+
+
 @app.post("/generate-package")
 def generate_package():
     engine = CQVIPEngine()
     engine.run()
 
     return FileResponse(
-        "exports/Validation_Package.zip",
+        PACKAGE_ZIP,
         media_type="application/zip",
         filename="Validation_Package.zip"
     )
 
-@app.post("/upload")
-async def upload(file: UploadFile = File(...)):
 
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-
-    with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    return {
-        "message": "Upload successful",
-        "filename": file.filename
-    }
-
-@app.get("/upload")
-async def upload_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="upload.html",
-        context={}
+@app.get("/download")
+def download_package():
+    return FileResponse(
+        PACKAGE_ZIP,
+        media_type="application/zip",
+        filename="Validation_Package.zip"
     )
