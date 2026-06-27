@@ -5,6 +5,14 @@ from fastapi.templating import Jinja2Templates
 
 from app.services.cqvip_engine import CQVIPEngine
 
+from fastapi import UploadFile, File
+import shutil
+import os
+
+UPLOAD_FOLDER = "documents"
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 
 app = FastAPI(title="CQVIP")
 
@@ -32,3 +40,16 @@ def generate_package():
         media_type="application/zip",
         filename="Validation_Package.zip"
     )
+
+@app.post("/upload")
+async def upload(file: UploadFile = File(...)):
+
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {
+        "message": "Upload successful",
+        "filename": file.filename
+    }
