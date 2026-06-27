@@ -41,8 +41,8 @@ def get_dashboard_data():
             "text": requirement.text,
             "category": requirement.category,
             "criticality": requirement.criticality,
-            "recommended": requirement.recommended_phase,
-            "verified": requirement.verified
+            "recommended": getattr(requirement, "recommended_phase", getattr(requirement, "recommended", "")),
+            "verified": getattr(requirement, "verified", False)
         })
 
     return {
