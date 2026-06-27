@@ -129,3 +129,36 @@ td {
 tr:hover {
     background: #f8fafc;
 }
+
+.badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge.critical {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge.major {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge.minor {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge.verified {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge.open {
+    background: #fef3c7;
+    color: #92400e;
+}
