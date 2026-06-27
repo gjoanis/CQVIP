@@ -2,6 +2,7 @@ from app.models.project import Project
 from app.models.asset import Asset
 from app.models.document import Document
 
+from app.parsers.document_loader import DocumentLoader
 from app.parsers.urs_parser import URSParser
 
 from app.services.qualification_engine import QualificationEngine
@@ -26,19 +27,8 @@ def main():
         "URS"
     )
 
-    urs_text = """
-The washer shall complete a validated cleaning cycle.
-
-The washer shall alarm upon cycle failure.
-
-The washer shall record cycle data.
-
-The system shall maintain pressure during operation.
-
-The safety interlock shall prevent unsafe operation.
-
-The operator shall complete training before use.
-"""
+    loader = DocumentLoader()
+    urs_text = loader.load_docx("documents/sample_urs.docx")
 
     parser = URSParser(urs_text)
     requirements = parser.extract_requirements()

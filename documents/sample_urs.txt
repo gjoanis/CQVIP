@@ -1,0 +1,11 @@
+The washer shall complete a validated cleaning cycle.
+
+The washer shall alarm upon cycle failure.
+
+The washer shall record cycle data.
+
+The system shall maintain pressure during operation.
+
+The safety interlock shall prevent unsafe operation.
+
+The operator shall complete training before use.
