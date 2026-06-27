@@ -1,62 +1,56 @@
 class AIInsights:
     """
     Rule-based AI-style insights for CQVIP Version 1.0.
-
-    This does not call an external AI API yet.
-    It creates executive summaries, gap analysis, and recommendations
-    from the parsed URS requirements.
+    Generates project summary, gap analysis, and recommendations.
     """
 
     def __init__(self, requirements):
         self.requirements = requirements
 
     def generate_project_summary(self):
-        total_requirements = len(self.requirements)
-        critical_requirements = self.count_critical_requirements()
-        open_requirements = self.count_open_requirements()
-        readiness_score = self.calculate_readiness_score()
+        total = len(self.requirements)
+        critical = self.count_critical_requirements()
+        open_count = self.count_open_requirements()
+        readiness = self.calculate_readiness_score()
 
-        if total_requirements == 0:
+        if total == 0:
             return {
-                "health": "No URS uploaded",
-                "summary": "Upload a URS document to begin requirement extraction and validation package generation.",
-                "risk_level": "Not assessed"
+                "health": "No URS Uploaded",
+                "summary": "Upload a URS document to begin requirement extraction.",
+                "risk_level": "Not Assessed"
             }
 
-        if readiness_score >= 80:
+        if readiness >= 80:
             health = "Good"
-            risk_level = "Low"
-        elif readiness_score >= 50:
+            risk = "Low"
+        elif readiness >= 50:
             health = "Needs Review"
-            risk_level = "Moderate"
+            risk = "Moderate"
         else:
             health = "At Risk"
-            risk_level = "High"
-
-        summary = (
-            f"{total_requirements} requirements were detected. "
-            f"{critical_requirements} requirements are classified as Critical. "
-            f"{open_requirements} requirements remain open. "
-            f"The current inspection readiness score is {readiness_score}%."
-        )
+            risk = "High"
 
         return {
             "health": health,
-            "summary": summary,
-            "risk_level": risk_level
+            "summary": (
+                f"{total} requirements were detected. "
+                f"{critical} requirements are classified as Critical. "
+                f"{open_count} requirements remain open. "
+                f"The current inspection readiness score is {readiness}%."
+            ),
+            "risk_level": risk
         }
 
     def generate_gap_analysis(self):
         gaps = []
 
-        for requirement in self.requirements:
-            req_id = requirement.get("req_id", "")
-            recommended = requirement.get("recommended", "")
-            verified = requirement.get("verified", False)
+        for req in self.requirements:
+            req_id = req.get("req_id", "Unknown Requirement")
+            phase = self.infer_phase(req)
 
-            if verified is False:
+            if req.get("verified", False) is False:
                 gaps.append(
-                    f"{req_id} remains open and requires verification during {recommended}."
+                    f"{req_id} remains open and requires verification during {phase}."
                 )
 
         if not gaps:
@@ -67,45 +61,40 @@ class AIInsights:
     def generate_recommendations(self):
         recommendations = []
 
-        for requirement in self.requirements:
-            req_id = requirement.get("req_id", "")
-            category = requirement.get("category", "")
-            criticality = requirement.get("criticality", "")
-            recommended = requirement.get("recommended", "")
+        for req in self.requirements:
+            req_id = req.get("req_id", "Unknown Requirement")
+            text = req.get("text", "").lower()
+            category = req.get("category", "")
+            criticality = req.get("criticality", "")
+            phase = self.infer_phase(req)
+
+            recommendations.append(
+                f"{req_id}: Verify this requirement during {phase} and confirm objective evidence is captured."
+            )
+
+            if "alarm" in text or category == "Alarm":
+                recommendations.append(
+                    f"{req_id}: Confirm alarm activation, acknowledgement, and recording are tested."
+                )
+
+            if "data" in text or category == "Data Integrity":
+                recommendations.append(
+                    f"{req_id}: Review data integrity controls, record retention, and audit trail expectations."
+                )
+
+            if "safety" in text or "interlock" in text or category == "Safety":
+                recommendations.append(
+                    f"{req_id}: Confirm safety interlocks and fail-safe behavior are challenged."
+                )
+
+            if "clean" in text or "cycle" in text:
+                recommendations.append(
+                    f"{req_id}: Confirm cleaning cycle parameters and acceptance criteria are documented."
+                )
 
             if criticality == "Critical":
                 recommendations.append(
-                    f"{req_id}: Prioritize this requirement because it is classified as Critical."
-                )
-
-            if "OQ" in recommended:
-                recommendations.append(
-                    f"{req_id}: Confirm functional challenge testing is included in OQ."
-                )
-
-            if "PQ" in recommended:
-                recommendations.append(
-                    f"{req_id}: Confirm performance-based acceptance criteria are defined for PQ."
-                )
-
-            if "IQ" in recommended:
-                recommendations.append(
-                    f"{req_id}: Confirm installation verification evidence is documented in IQ."
-                )
-
-            if category == "Data Integrity":
-                recommendations.append(
-                    f"{req_id}: Review audit trail, record retention, user access, and data integrity controls."
-                )
-
-            if category == "Safety":
-                recommendations.append(
-                    f"{req_id}: Confirm safety interlocks, alarms, and fail-safe behavior are challenged."
-                )
-
-            if category == "Alarm":
-                recommendations.append(
-                    f"{req_id}: Confirm alarm activation, acknowledgement, and recording are verified."
+                    f"{req_id}: Prioritize this requirement because it may impact product quality, safety, or compliance."
                 )
 
         if not recommendations:
@@ -113,34 +102,50 @@ class AIInsights:
 
         return recommendations[:10]
 
+    def infer_phase(self, req):
+        recommended = req.get("recommended", "")
+
+        if recommended:
+            return recommended
+
+        text = req.get("text", "").lower()
+        category = req.get("category", "").lower()
+
+        if "install" in text or "utility" in text:
+            return "IQ"
+
+        if "alarm" in text or "interlock" in text or "record" in text or "data" in text:
+            return "OQ"
+
+        if "clean" in text or "cycle" in text or "performance" in text:
+            return "PQ"
+
+        if "training" in text:
+            return "Training"
+
+        if category in ["alarm", "safety", "data integrity"]:
+            return "OQ"
+
+        return "OQ"
+
     def count_critical_requirements(self):
-        count = 0
-
-        for requirement in self.requirements:
-            if requirement.get("criticality", "") == "Critical":
-                count += 1
-
-        return count
-
-    def count_open_requirements(self):
-        count = 0
-
-        for requirement in self.requirements:
-            if requirement.get("verified", False) is False:
-                count += 1
-
-        return count
-
-    def calculate_readiness_score(self):
-        total_requirements = len(self.requirements)
-
-        if total_requirements == 0:
-            return 0
-
-        open_requirements = self.count_open_requirements()
-
-        readiness_score = round(
-            ((total_requirements - open_requirements) / total_requirements) * 100
+        return sum(
+            1 for req in self.requirements
+            if req.get("criticality", "") == "Critical"
         )
 
-        return readiness_score
+    def count_open_requirements(self):
+        return sum(
+            1 for req in self.requirements
+            if req.get("verified", False) is False
+        )
+
+    def calculate_readiness_score(self):
+        total = len(self.requirements)
+
+        if total == 0:
+            return 0
+
+        open_count = self.count_open_requirements()
+
+        return round(((total - open_count) / total) * 100)
