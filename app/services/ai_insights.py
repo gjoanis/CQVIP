@@ -1,7 +1,7 @@
 class AIInsights:
     """
     Rule-based AI-style insights for CQVIP Version 1.0.
-    Generates project summary, gap analysis, and recommendations.
+    Generates project summary, gap analysis, and qualification recommendations.
     """
 
     def __init__(self, requirements):
@@ -62,39 +62,53 @@ class AIInsights:
         recommendations = []
 
         for req in self.requirements:
+            if req.get("verified", False):
+                continue
+
             req_id = req.get("req_id", "Unknown Requirement")
             text = req.get("text", "").lower()
             category = req.get("category", "")
             criticality = req.get("criticality", "")
             phase = self.infer_phase(req)
 
-            recommendations.append(
-                f"{req_id}: Verify this requirement during {phase} and confirm objective evidence is captured."
-            )
-
-            if "alarm" in text or category == "Alarm":
+            if category == "Cleaning" or "clean" in text or "cycle" in text:
                 recommendations.append(
-                    f"{req_id}: Confirm alarm activation, acknowledgement, and recording are tested."
+                    f"{req_id}: Execute a full cleaning cycle during {phase}, document cycle parameters, and attach objective evidence."
                 )
 
-            if "data" in text or category == "Data Integrity":
+            elif category == "Alarm" or "alarm" in text:
                 recommendations.append(
-                    f"{req_id}: Review data integrity controls, record retention, and audit trail expectations."
+                    f"{req_id}: Challenge the alarm logic, verify alarm acknowledgement, and document alarm response."
                 )
 
-            if "safety" in text or "interlock" in text or category == "Safety":
+            elif category == "Data Integrity" or "data" in text or "record" in text:
                 recommendations.append(
-                    f"{req_id}: Confirm safety interlocks and fail-safe behavior are challenged."
+                    f"{req_id}: Verify audit trail functionality, record retention, user access, and 21 CFR Part 11 expectations."
                 )
 
-            if "clean" in text or "cycle" in text:
+            elif category == "Safety" or "safety" in text or "interlock" in text:
                 recommendations.append(
-                    f"{req_id}: Confirm cleaning cycle parameters and acceptance criteria are documented."
+                    f"{req_id}: Execute safety interlock testing and document fail-safe operation."
+                )
+
+            elif category == "Environmental" or "pressure" in text:
+                recommendations.append(
+                    f"{req_id}: Verify operating conditions remain within validated environmental or process limits."
+                )
+
+            elif category == "Operational" or "training" in text or "operator" in text:
+                recommendations.append(
+                    f"{req_id}: Confirm operator training is completed and training records are approved before release."
+                )
+
+            else:
+                recommendations.append(
+                    f"{req_id}: Execute this requirement during {phase}, document objective evidence, and link results to the traceability matrix."
                 )
 
             if criticality == "Critical":
                 recommendations.append(
-                    f"{req_id}: Prioritize this requirement because it may impact product quality, safety, or compliance."
+                    f"{req_id}: Prioritize this requirement because it may impact product quality, patient safety, or GMP compliance."
                 )
 
         if not recommendations:
@@ -114,17 +128,34 @@ class AIInsights:
         if "install" in text or "utility" in text:
             return "IQ"
 
-        if "alarm" in text or "interlock" in text or "record" in text or "data" in text:
+        if (
+            "alarm" in text
+            or "interlock" in text
+            or "record" in text
+            or "data" in text
+            or "safety" in text
+        ):
             return "OQ"
 
-        if "clean" in text or "cycle" in text or "performance" in text:
+        if (
+            "clean" in text
+            or "cycle" in text
+            or "performance" in text
+            or "pressure" in text
+        ):
             return "PQ"
 
-        if "training" in text:
+        if "training" in text or "operator" in text:
             return "Training"
 
         if category in ["alarm", "safety", "data integrity"]:
             return "OQ"
+
+        if category in ["cleaning", "environmental"]:
+            return "PQ"
+
+        if category == "operational":
+            return "Training"
 
         return "OQ"
 
