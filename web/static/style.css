@@ -214,14 +214,8 @@ tr:hover {
     margin-bottom:25px;
 }
 
-.details-header button{
-    border:none;
-    background:none;
-    font-size:24px;
-    cursor:pointer;
-}
-
 .details-header button {
+
     background: #e5e7eb;
     color: #111827;
     border: none;
@@ -231,7 +225,7 @@ tr:hover {
     font-size: 20px;
     cursor: pointer;
 }
-
 .details-header button:hover {
     background: #cbd5e1;
 }
+
