@@ -123,8 +123,8 @@
                         data-criticality="{{ requirement.criticality }}"
                         data-phase="{{ requirement.recommended }}"
                         data-status="{{ 'Verified' if requirement.verified else 'Open' }}"
-                        onclick="showRequirementDetails(this)">
-                </tr>
+                        onclick="showRequirementDetails(this)"
+                    >
                         <td>{{ requirement.req_id }}</td>
                         <td>{{ requirement.text }}</td>
                         <td>{{ requirement.category }}</td>
@@ -152,11 +152,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <div id="requirementDetails" class="requirement-details">
-            <h3>Requirement Details</h3>
-            <p>Select a requirement to view details.</p>
-        </div>
     </div>
 
     <div class="section">
@@ -179,6 +174,25 @@
 
 </div>
 
+<div id="detailsPanel" class="details-panel">
+
+    <div class="details-header">
+        <h2>Requirement Details</h2>
+        <button type="button" onclick="closeDetails()">×</button>
+    </div>
+
+    <p><strong>ID:</strong> <span id="detailID"></span></p>
+
+    <p><strong>Description:</strong></p>
+    <p id="detailText"></p>
+
+    <p><strong>Category:</strong> <span id="detailCategory"></span></p>
+    <p><strong>Criticality:</strong> <span id="detailCriticality"></span></p>
+    <p><strong>Recommended Phase:</strong> <span id="detailPhase"></span></p>
+    <p><strong>Status:</strong> <span id="detailStatus"></span></p>
+
+</div>
+
 <script>
 function filterRequirements() {
     let searchInput = document.getElementById("requirementSearch").value.toLowerCase();
@@ -195,9 +209,11 @@ function filterRequirements() {
         let matchesCriticality = criticalityFilter === "" || rowText.includes(criticalityFilter);
         let matchesStatus = statusFilter === "" || rowText.includes(statusFilter);
 
-        rows[i].style.display = matchesSearch && matchesCriticality && matchesStatus ? "" : "none";
+        rows[i].style.display =
+            matchesSearch && matchesCriticality && matchesStatus ? "" : "none";
     }
 }
+
 function showRequirementDetails(row) {
     document.getElementById("detailID").innerText = row.dataset.id;
     document.getElementById("detailText").innerText = row.dataset.text;
@@ -212,34 +228,7 @@ function showRequirementDetails(row) {
 function closeDetails() {
     document.getElementById("detailsPanel").classList.remove("open");
 }
-
 </script>
 
-<div id="detailsPanel" class="details-panel">
-
-    <div class="details-header">
-        <h2>Requirement Details</h2>
-        <button type="button" onclick="closeDetails()">×</button>
-    </div>
-
-    <p><strong>ID:</strong> <span id="detailID"></span></p>
-
-    ...
-</div>
-
-    <p><strong>ID:</strong> <span id="detailID"></span></p>
-
-    <p><strong>Description:</strong></p>
-    <p id="detailText"></p>
-
-    <p><strong>Category:</strong> <span id="detailCategory"></span></p>
-
-    <p><strong>Criticality:</strong> <span id="detailCriticality"></span></p>
-
-    <p><strong>Recommended Phase:</strong> <span id="detailPhase"></span></p>
-
-    <p><strong>Status:</strong> <span id="detailStatus"></span></p>
-
-</div>
 </body>
 </html>
