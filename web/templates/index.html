@@ -4,61 +4,73 @@
 <head>
     <meta charset="UTF-8">
     <title>CQVIP</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
+<div class="header">
     <h1>CQVIP</h1>
+    <p>Commissioning, Qualification & Validation Intelligence Platform</p>
+</div>
 
-    <h2>Commissioning, Qualification & Validation Intelligence Platform</h2>
+<div class="container">
 
-    <hr>
+    <div class="card-grid">
+        <div class="card">
+            <h3>Total Requirements</h3>
+            <p>{{ dashboard.total_requirements }}</p>
+        </div>
 
-    <h3>Current Project</h3>
-    <p>CQVIP Demonstration</p>
+        <div class="card">
+            <h3>Critical Requirements</h3>
+            <p>{{ dashboard.critical_requirements }}</p>
+        </div>
 
-    <h3>Asset</h3>
-    <p>Decontamination Washer</p>
+        <div class="card">
+            <h3>Project</h3>
+            <p style="font-size:18px;">CQVIP Demonstration</p>
+        </div>
 
-    <hr>
+        <div class="card">
+            <h3>Asset</h3>
+            <p style="font-size:18px;">Decontamination Washer</p>
+        </div>
+    </div>
 
-    <h3>Uploaded Documents</h3>
+    <div class="section">
+        <h2>Uploaded Documents</h2>
 
-    {% if files %}
-        <ul>
-            {% for file in files %}
-                <li>{{ file }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No documents uploaded.</p>
-    {% endif %}
+        {% if files %}
+            <ul>
+                {% for file in files %}
+                    <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No documents uploaded.</p>
+        {% endif %}
+    </div>
 
-    <hr>
+    <div class="section">
+        <h2>Actions</h2>
 
-    <h3>Requirement Dashboard</h3>
+        <div class="actions">
+            <a href="/upload">
+                <button>Upload URS</button>
+            </a>
 
-    <p>Total Requirements: {{ dashboard.total_requirements }}</p>
-    <p>Critical Requirements: {{ dashboard.critical_requirements }}</p>
+            <form action="/generate-package" method="post">
+                <button type="submit">Generate Validation Package</button>
+            </form>
 
-    <hr>
+            <a href="/download">
+                <button>Download Latest Package</button>
+            </a>
+        </div>
+    </div>
 
-    <a href="/upload">
-        <button>Upload URS</button>
-    </a>
-
-    <br><br>
-
-    <form action="/generate-package" method="post">
-        <button type="submit">Generate Validation Package</button>
-    </form>
-
-    <br>
-
-    <a href="/download">
-        <button>Download Latest Package</button>
-    </a>
+</div>
 
 </body>
-
 </html>
