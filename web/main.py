@@ -33,7 +33,20 @@ def get_dashboard_data():
         if requirement.criticality == "Critical":
             critical_requirements += 1
 
+    requirements = []
+
+    for requirement in engine.requirements:
+        requirements.append({
+            "req_id": requirement.req_id,
+            "text": requirement.text,
+            "category": requirement.category,
+            "criticality": requirement.criticality,
+            "recommended": requirement.recommended_phase,
+            "verified": requirement.verified
+        })
+
     return {
+        "requirements": requirement,
         "total_requirements": total_requirements,
         "critical_requirements": critical_requirements,
         "lifecycle": [
