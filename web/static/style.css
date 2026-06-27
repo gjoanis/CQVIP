@@ -200,7 +200,7 @@ tr:hover {
     transition: transform .35s ease;
     padding: 30px;
     overflow: auto;
-    z-index: 999;
+    z-index: 9999;
     box-sizing: border-box;
     transform: translateX(100%);
 }
@@ -209,15 +209,14 @@ tr:hover {
     transform: translateX(0);
 }
 
-.details-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
 }
 
 .details-header button {
-
     background: #e5e7eb;
     color: #111827;
     border: none;
@@ -227,7 +226,3 @@ tr:hover {
     font-size: 20px;
     cursor: pointer;
 }
-.details-header button:hover {
-    background: #cbd5e1;
-}
-
