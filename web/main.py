@@ -134,7 +134,11 @@ def home(request: Request):
             "dashboard": dashboard
         }
     )
+from pathlib import Path
+import shutil
 
+UPLOAD_FOLDER = Path("documents")
+UPLOAD_FOLDER.mkdir(exist_ok=True)
 
 @app.get("/upload", response_class=HTMLResponse)
 def upload_page(request: Request):
@@ -144,24 +148,18 @@ def upload_page(request: Request):
         context={}
     )
 
-
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    for existing_file in os.listdir(UPLOAD_FOLDER):
-        existing_path = os.path.join(UPLOAD_FOLDER, existing_file)
-
-        if os.path.isfile(existing_path):
-            os.remove(existing_path)
-
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    filepath = UPLOAD_FOLDER / file.filename
 
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return RedirectResponse(
-        url="/",
-        status_code=303
-    )
+    return {
+        "success": True,
+        "filename": file.filename,
+        "path": str(filepath)
+    }
 
 
 @app.post("/generate-package")
