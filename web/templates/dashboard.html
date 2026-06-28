@@ -2,9 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>CQVIP Executive Dashboard</title>
+
+    <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
+
+<nav class="navbar">
+    <div class="logo">CQVIP</div>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/upload">Upload</a>
+    </div>
+</nav>
+
+<section class="section dashboard">
+
+    <h1>Executive Validation Dashboard</h1>
+
+    <p>
+        Real-time visibility into requirements, criticality,
+        lifecycle status, and AI recommendations.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h2>{{ dashboard.total_requirements }}</h2>
+            <p>Total Requirements</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ dashboard.open_requirements }}</h2>
+            <p>Open Requirements</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ dashboard.critical_requirements }}</h2>
+            <p>Critical Requirements</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ dashboard.readiness_score }}%</h2>
+            <p>{{ dashboard.readiness_status }}</p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <h2>Qualification Lifecycle</h2>
+
+    <div class="cards">
+
+        {% for stage in dashboard.lifecycle %}
+
+        <div class="card">
+
+            <strong>{{ stage.stage }}</strong>
+
+            <p>{{ stage.status }}</p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <h2>Requirements</h2>
+
+    <table style="width:100%; border-collapse:collapse;">
+
+        <tr>
+            <th align="left">ID</th>
+            <th align="left">Requirement</th>
+            <th align="left">Category</th>
+            <th align="left">Recommended</th>
+            <th align="left">Verified</th>
+        </tr>
+
+        {% for req in dashboard.requirements %}
+
+        <tr>
+
+            <td>{{ req.req_id }}</td>
+
+            <td>{{ req.text }}</td>
+
+            <td>{{ req.category }}</td>
+
+            <td>{{ req.recommended }}</td>
+
+            <td>{{ req.verified }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</section>
 
 </body>
 </html>
