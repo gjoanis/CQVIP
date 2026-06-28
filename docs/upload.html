@@ -172,8 +172,9 @@
 
       <label class="btn" for="fileUpload">Choose Files</label>
       <input id="fileUpload" type="file" multiple />
+      <br><br>
+      <button class="btn" onclick="uploadFile()">Analyze Documents</button>
     </section>
-
     <section class="grid">
       <div class="card">
         <h2>Uploaded Files</h2>
@@ -214,5 +215,27 @@
       </div>
     </section>
   </main>
+<script>
+  async function uploadFile() {
+    const input = document.getElementById("fileUpload");
+
+    if (!input.files.length) {
+      alert("Please choose a file first.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", input.files[0]);
+
+    const response = await fetch("http://127.0.0.1:8000/upload-document", {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+
+    alert(result.message + ": " + result.filename);
+  }
+</script>
 </body>
 </html>
