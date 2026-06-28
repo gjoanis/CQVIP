@@ -1,15 +1,17 @@
 import os
 import shutil
 
-from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 from app.services.cqvip_engine import CQVIPEngine
 from app.services.ai_insights import AIInsights
 from app.services.chart_service import ChartService
 
+from fastapi import FastAPI, Request, UploadFile, File
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+import os
 
 app = FastAPI(title="CQVIP")
 
@@ -17,6 +19,22 @@ templates = Jinja2Templates(directory="web/templates")
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.post("/upload-document")
+async def upload_document(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(await file.read())
+
+    return JSONResponse({
+        "status": "success",
+        "filename": file.filename,
+        "message": "Document uploaded successfully",
+        "next_step": "AI requirement extraction ready"
+    })
 
 UPLOAD_FOLDER = "documents"
 PACKAGE_ZIP = "exports/Validation_Package.zip"
