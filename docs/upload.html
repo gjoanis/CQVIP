@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CQVIP Upload Documents</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #111827;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside {
+      width: 260px;
+      background: #0f172a;
+      color: white;
+      padding: 28px 22px;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #60a5fa;
+      margin-bottom: 30px;
+    }
+
+    aside a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 12px 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    aside a.active,
+    aside a:hover {
+      background: #1e293b;
+      color: white;
+    }
+
+    main {
+      flex: 1;
+      padding: 36px;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    .upload-box {
+      background: white;
+      border: 2px dashed #93c5fd;
+      border-radius: 22px;
+      padding: 60px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(15,23,42,.08);
+      margin-bottom: 28px;
+    }
+
+    .upload-box h2 {
+      color: #2563eb;
+      margin-bottom: 12px;
+    }
+
+    .upload-box p {
+      color: #64748b;
+      margin-bottom: 22px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #2563eb;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(15,23,42,.08);
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .status {
+      color: #16a34a;
+      font-weight: 800;
+    }
+
+    .progress-bar {
+      background: #e5e7eb;
+      height: 16px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 18px 0;
+    }
+
+    .progress {
+      width: 62%;
+      height: 100%;
+      background: #2563eb;
+    }
+
+    li {
+      margin: 10px 0;
+      color: #334155;
+    }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      aside { width: 100%; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <aside>
+    <div class="logo">CQVIP</div>
+    <a href="dashboard.html">Dashboard</a>
+    <a class="active" href="upload.html">Upload Documents</a>
+    <a href="#">Requirements</a>
+    <a href="#">Traceability Matrix</a>
+    <a href="#">Gap Analysis</a>
+    <a href="#">Reports</a>
+    <a href="index.html">Back to Site</a>
+  </aside>
+
+  <main>
+    <h1>Upload Validation Documents</h1>
+    <p class="subtitle">Upload URS, protocols, reports, and supporting documents for AI validation analysis.</p>
+
+    <section class="upload-box">
+      <h2>📄 Drag & Drop Documents Here</h2>
+      <p>Supported files: PDF, DOCX, XLSX, TXT</p>
+
+      <label class="btn" for="fileUpload">Choose Files</label>
+      <input id="fileUpload" type="file" multiple />
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Uploaded Files</h2>
+
+        <div class="file-item">
+          <span>URS_Decontamination_Washer.docx</span>
+          <span class="status">Ready</span>
+        </div>
+
+        <div class="file-item">
+          <span>OQ_Protocol.docx</span>
+          <span class="status">Ready</span>
+        </div>
+
+        <div class="file-item">
+          <span>Traceability_Matrix.xlsx</span>
+          <span class="status">Ready</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>AI Processing</h2>
+
+        <div class="progress-bar">
+          <div class="progress"></div>
+        </div>
+
+        <ul>
+          <li>✅ Reading document</li>
+          <li>✅ Extracting requirements</li>
+          <li>✅ Detecting risks</li>
+          <li>⏳ Building traceability matrix</li>
+        </ul>
+
+        <br>
+
+        <a class="btn" href="dashboard.html">Open Dashboard</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
