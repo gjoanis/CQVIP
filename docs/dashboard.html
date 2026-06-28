@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CQVIP Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #111827;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside {
+      width: 260px;
+      background: #0f172a;
+      color: white;
+      padding: 28px 22px;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #60a5fa;
+      margin-bottom: 36px;
+    }
+
+    aside a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 12px 0;
+      font-weight: 700;
+    }
+
+    main {
+      flex: 1;
+      padding: 34px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .topbar h1 {
+      font-size: 34px;
+    }
+
+    .badge {
+      background: #dcfce7;
+      color: #166534;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(15,23,42,.08);
+    }
+
+    .card h2 {
+      color: #2563eb;
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(15,23,42,.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(15,23,42,.08);
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f1f5f9;
+    }
+
+    .open { color: #b45309; font-weight: 800; }
+    .verified { color: #047857; font-weight: 800; }
+    .major { color: #dc2626; font-weight: 800; }
+    .minor { color: #2563eb; font-weight: 800; }
+  </style>
+</head>
+
+<body>
+  <aside>
+    <div class="logo">CQVIP</div>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="#">Projects</a>
+    <a href="#">Requirements</a>
+    <a href="#">Traceability Matrix</a>
+    <a href="#">Gap Analysis</a>
+    <a href="#">Lifecycle</a>
+    <a href="#">AI Assistant</a>
+    <a href="index.html">Back to Site</a>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <h1>Validation Intelligence Dashboard</h1>
+        <p>Project: Decontamination Washer Qualification</p>
+      </div>
+      <div class="badge">Live Prototype</div>
+    </div>
+
+    <section class="cards">
+      <div class="card">
+        <h2 id="totalReq">0</h2>
+        <p>Total Requirements</p>
+      </div>
+      <div class="card">
+        <h2 id="openReq">0</h2>
+        <p>Open Requirements</p>
+      </div>
+      <div class="card">
+        <h2 id="criticalReq">0</h2>
+        <p>Critical Requirements</p>
+      </div>
+      <div class="card">
+        <h2 id="readiness">0%</h2>
+        <p>Inspection Readiness</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Requirements by Status</h2>
+        <canvas id="statusChart"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Requirements by Criticality</h2>
+        <canvas id="criticalityChart"></canvas>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>AI Gap Analysis</h2>
+      <p id="gapSummary"></p>
+    </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Requirement</th>
+          <th>Category</th>
+          <th>Criticality</th>
+          <th>Phase</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="requirementsTable"></tbody>
+    </table>
+  </main>
+
+  <script>
+    const requirements = [
+      {
+        id: "URS-001",
+        text: "The system shall support validated cleaning of equipment components.",
+        category: "Functional",
+        criticality: "Minor",
+        phase: "OQ",
+        status: "Verified"
+      },
+      {
+        id: "URS-002",
+        text: "The washer shall execute documented cleaning cycles with objective evidence.",
+        category: "Functional",
+        criticality: "Major",
+        phase: "OQ",
+        status: "Open"
+      },
+      {
+        id: "URS-003",
+        text: "Operating conditions shall remain within validated environmental limits.",
+        category: "Environmental",
+        criticality: "Major",
+        phase: "PQ",
+        status: "Open"
+      }
+    ];
+
+    const total = requirements.length;
+    const open = requirements.filter(r => r.status === "Open").length;
+    const verified = requirements.filter(r => r.status === "Verified").length;
+    const major = requirements.filter(r => r.criticality === "Major").length;
+    const readiness = Math.round((verified / total) * 100);
+
+    document.getElementById("totalReq").textContent = total;
+    document.getElementById("openReq").textContent = open;
+    document.getElementById("criticalReq").textContent = major;
+    document.getElementById("readiness").textContent = readiness + "%";
+
+    document.getElementById("gapSummary").textContent =
+      `${open} requirements remain open. ${major} major requirements require verification before inspection readiness can be achieved.`;
+
+    const table = document.getElementById("requirementsTable");
+
+    requirements.forEach(r => {
+      table.innerHTML += `
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.text}</td>
+          <td>${r.category}</td>
+          <td class="${r.criticality.toLowerCase()}">${r.criticality}</td>
+          <td>${r.phase}</td>
+          <td class="${r.status.toLowerCase()}">${r.status}</td>
+        </tr>
+      `;
+    });
+
+    new Chart(document.getElementById("statusChart"), {
+      type: "doughnut",
+      data: {
+        labels: ["Verified", "Open"],
+        datasets: [{
+          data: [verified, open],
+          backgroundColor: ["#10b981", "#f59e0b"]
+        }]
+      }
+    });
+
+    new Chart(document.getElementById("criticalityChart"), {
+      type: "bar",
+      data: {
+        labels: ["Minor", "Major"],
+        datasets: [{
+          label: "Requirements",
+          data: [
+            requirements.filter(r => r.criticality === "Minor").length,
+            requirements.filter(r => r.criticality === "Major").length
+          ],
+          backgroundColor: ["#2563eb", "#ef4444"]
+        }]
+      }
+    });
+  </script>
+</body>
+</html>
