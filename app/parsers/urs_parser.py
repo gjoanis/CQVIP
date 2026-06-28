@@ -54,42 +54,42 @@ class URSParser:
         else:
             return "Minor"
 
-    def extract_requirement_id(self, line, counter):
-        match = re.match(r"^(URS-\d+|REQ-\d+|FRS-\d+|DS-\d+)\s*[-:]*\s*(.*)", line)
-
-        if match:
-            return match.group(1), match.group(2)
-
-        return f"URS-{counter:03}", line
-
     def extract_requirements(self):
         requirements = []
-        lines = self.text.split("\n")
         counter = 1
 
-        for line in lines:
-            line = line.strip()
+        text = self.text.replace("\r", "")
 
-            if not line:
-                continue
+        pattern = re.compile(
+            r"(URS-\d+|REQ-\d+|FRS-\d+|DS-\d+)?\s*(.*?shall.*?)(?=\n\s*\n|\n[A-Z][A-Za-z ]+:|\Z)",
+            re.IGNORECASE | re.DOTALL
+        )
 
-            if "shall" in line.lower():
-                req_id, req_text = self.extract_requirement_id(line, counter)
+        for match in pattern.finditer(text):
 
-                category = self.categorize(req_text)
-                verification = self.recommend_verification(category)
-                criticality = self.assign_criticality(category)
+            req_id = match.group(1)
+            req_text = match.group(2).strip()
 
-                requirement = Requirement(
-                    req_id,
-                    req_text,
-                    category
-                )
+            req_text = re.sub(r"\s+", " ", req_text)
 
-                requirement.set_recommended_verification(verification)
-                requirement.set_criticality(criticality)
+            if not req_id:
+                req_id = f"URS-{counter:03}"
 
-                requirements.append(requirement)
-                counter += 1
+            category = self.categorize(req_text)
+            verification = self.recommend_verification(category)
+            criticality = self.assign_criticality(category)
+
+            requirement = Requirement(
+                req_id,
+                req_text,
+                category
+            )
+
+            requirement.set_recommended_verification(verification)
+            requirement.set_criticality(criticality)
+
+            requirements.append(requirement)
+
+            counter += 1
 
         return requirements
