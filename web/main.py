@@ -123,8 +123,9 @@ def get_dashboard_data():
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse(
-        "login.html",
-        {"request": request}
+        request=request,
+        name="login.html",
+        context={}
     )
 
 
@@ -138,9 +139,9 @@ def login(
         return RedirectResponse(url="/dashboard", status_code=303)
 
     return templates.TemplateResponse(
-        "login.html",
-        {
-            "request": request,
+        request=request,
+        name="login.html",
+        context={
             "error": "Invalid username or password."
         }
     )
