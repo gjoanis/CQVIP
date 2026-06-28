@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CQVIP Login</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #eff6ff, #f8fafc);
+      color: #111827;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+      background: white;
+      padding: 42px;
+      border-radius: 22px;
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.15);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2563eb;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .links a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .demo-note {
+      margin-top: 24px;
+      padding: 14px;
+      background: #eff6ff;
+      border-radius: 10px;
+      color: #1e3a8a;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-card">
+    <div class="logo">CQVIP</div>
+
+    <h1>Sign in</h1>
+    <p class="subtitle">Access your validation intelligence workspace</p>
+
+    <form>
+      <label>Email</label>
+      <input type="email" placeholder="you@company.com" />
+
+      <label>Password</label>
+      <input type="password" placeholder="Enter password" />
+
+      <button type="button" onclick="window.location.href='index.html#dashboard'">
+        Sign In
+      </button>
+    </form>
+
+    <div class="links">
+      <a href="index.html">Back to Home</a>
+      <a href="#">Forgot Password?</a>
+    </div>
+
+    <div class="demo-note">
+      Demo login page only — authentication coming soon.
+    </div>
+  </div>
+</body>
+</html>
