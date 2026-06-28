@@ -125,7 +125,7 @@ def get_dashboard_data():
 def home(request: Request):
     files = os.listdir(UPLOAD_FOLDER)
 
-    dashboard = get_dashboard_data()
+    dashboard = {}
 
     return templates.TemplateResponse(
         request=request,
