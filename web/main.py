@@ -7,7 +7,7 @@ from app.services.cqvip_engine import CQVIPEngine
 from app.services.ai_insights import AIInsights
 from app.services.chart_service import ChartService
 
-from fastapi import FastAPI, Request, UploadFile, File
+from fastapi import FastAPI, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -120,7 +120,30 @@ def get_dashboard_data():
         ]
     }
 
+@app.get("/login", response_class=HTMLResponse)
+def login_page(request: Request):
+    return templates.TemplateResponse(
+        "login.html",
+        {"request": request}
+    )
 
+
+@app.post("/login")
+def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...)
+):
+    if username == "demo" and password == "demo123":
+        return RedirectResponse(url="/dashboard", status_code=303)
+
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "error": "Invalid username or password."
+        }
+    )
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     files = os.listdir(UPLOAD_FOLDER)
