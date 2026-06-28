@@ -18,6 +18,7 @@ app = FastAPI(title="CQVIP")
 templates = Jinja2Templates(directory="web/templates")
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
+app.mount("/screenshots", StaticFiles(directory="docs/screenshots"), name="screenshots")
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
