@@ -141,6 +141,18 @@ import shutil
 UPLOAD_FOLDER = Path("documents")
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard_page(request: Request):
+    dashboard = get_dashboard_data()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboard.html",
+        context={
+            "dashboard": dashboard
+        }
+    )
+
 @app.get("/upload", response_class=HTMLResponse)
 def upload_page(request: Request):
     return templates.TemplateResponse(
