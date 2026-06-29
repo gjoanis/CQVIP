@@ -94,7 +94,19 @@ class URSParser:
                 continue
 
             # Skip generic instructional text
-            if "requirements specified" in lowered:
+            skip_phrases = [
+                "this document sets forth",
+                "requirement mandated",
+                "requirements specified",
+                "requirements generation",
+                "the following table summarizes",
+                "shall be the contractor’s responsibility",
+                "shall be the contractor's responsibility",
+                "turnover package shall be supplied",
+                "requirement specification identification"
+            ]
+
+            if any(phrase in lowered for phrase in skip_phrases):
                 continue
 
             req_id, req_text = self.extract_requirement_id(line, counter)
