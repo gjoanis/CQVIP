@@ -53,27 +53,56 @@ class URSParser:
             return "Major"
         else:
             return "Minor"
+    def extract_requirement_id(self, line, counter):
+        match = re.match(
+            r"^(URS[-_ ]?\d+|REQ[-_ ]?\d+|FRS[-_ ]?\d+|DS[-_ ]?\d+)\s*[-:|]*\s*(.*)",
+            line,
+            re.IGNORECASE
+        )
 
+        if match:
+            req_id = match.group(1).replace("_", "-").replace(" ", "-").upper()
+            req_text = match.group(2).strip()
+
+            if not req_text:
+                req_text = line
+
+            return req_id, req_text
+
+        return f"URS-{counter:03}", line
     def extract_requirements(self):
         requirements = []
         counter = 1
 
-        text = self.text.replace("\r", "")
+        lines = self.text.replace("\r", "").split("\n")
 
-        pattern = re.compile(
-            r"(URS-\d+|REQ-\d+|FRS-\d+|DS-\d+)?\s*(.*?shall.*?)(?=\n\s*\n|\n[A-Z][A-Za-z ]+:|\Z)",
-            re.IGNORECASE | re.DOTALL
-        )
+        for line in lines:
+            line = line.strip()
 
-        for match in pattern.finditer(text):
+            if not line:
+                continue
 
-            req_id = match.group(1)
-            req_text = match.group(2).strip()
+            lowered = line.lower()
 
-            req_text = re.sub(r"\s+", " ", req_text)
+            is_requirement = (
+                    "shall" in lowered
+                    or "must" in lowered
+                    or re.match(r"^(URS|REQ|FRS|DS)[-_ ]?\d+", line, re.IGNORECASE)
+            )
 
-            if not req_id:
-                req_id = f"URS-{counter:03}"
+            if not is_requirement:
+                continue
+
+            # Skip generic instructional text
+            if "requirements specified" in lowered:
+                continue
+
+            req_id, req_text = self.extract_requirement_id(line, counter)
+
+            req_text = re.sub(r"\s+", " ", req_text).strip()
+
+            if len(req_text) < 20:
+                continue
 
             category = self.categorize(req_text)
             verification = self.recommend_verification(category)
@@ -89,7 +118,6 @@ class URSParser:
             requirement.set_criticality(criticality)
 
             requirements.append(requirement)
-
             counter += 1
 
         return requirements
