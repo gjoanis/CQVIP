@@ -1,7 +1,7 @@
 import re
 
 from app.models.requirement import Requirement
-
+from app.services.ai_requirement_analyzer import AIRequirementAnalyzer
 
 class URSParser:
     """
@@ -112,13 +112,17 @@ class URSParser:
             req_id, req_text = self.extract_requirement_id(line, counter)
 
             req_text = re.sub(r"\s+", " ", req_text).strip()
+            req_text = re.sub(r"^[BQSO]\s*\|\s*", "", req_text).strip()
 
             if len(req_text) < 20:
                 continue
 
-            category = self.categorize(req_text)
-            verification = self.recommend_verification(category)
-            criticality = self.assign_criticality(category)
+            ai = AIRequirementAnalyzer()
+            analysis = ai.analyze(req_text)
+
+            category = analysis["category"]
+            verification = analysis["verification"]
+            criticality = analysis["criticality"]
 
             requirement = Requirement(
                 req_id,
@@ -126,9 +130,16 @@ class URSParser:
                 category
             )
 
+            requirement.risk = analysis.get("risk")
+            requirement.gmp_reference = analysis.get("gmp_reference")
+            requirement.acceptance_criteria = analysis.get("acceptance_criteria")
+            requirement.suggested_test = analysis.get("suggested_test")
+            requirement.inspection_concern = analysis.get("inspection_concern")
+            requirement.protocol_section = analysis.get("protocol_section")
+            requirement.test_steps = analysis.get("test_steps", [])
+            requirement.objective_evidence = analysis.get("objective_evidence", [])
             requirement.set_recommended_verification(verification)
             requirement.set_criticality(criticality)
-
             requirements.append(requirement)
             counter += 1
 

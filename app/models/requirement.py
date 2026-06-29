@@ -24,6 +24,14 @@ class Requirement:
         self.verified = False
         self.verified_by = None
         self.recommended_verification = None
+        self.risk = None
+        self.gmp_reference = None
+        self.acceptance_criteria = None
+        self.suggested_test = None
+        self.inspection_concern = None
+        self.protocol_section = None
+        self.test_steps = []
+        self.objective_evidence = []
         self.links = VerificationLink(req_id)
 
     def mark_verified(self, test_id):

@@ -19,3 +19,6 @@ documents/
 
 # Logs
 *.log
+
+# Secrets
+.env
