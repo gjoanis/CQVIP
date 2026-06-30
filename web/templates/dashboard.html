@@ -1,115 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <title>CQVIP Executive Dashboard</title>
+
+    <title>CQVIP Dashboard</title>
 
     <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
 <nav class="navbar">
-    <div class="logo">CQVIP</div>
+
+    <div class="logo">
+        CQVIP
+    </div>
 
     <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/upload">Upload</a>
+
+        <a href="/dashboard">Dashboard</a>
+
+        <a href="/upload">Upload URS</a>
+
+        <a href="/download">Download Package</a>
+
     </div>
+
 </nav>
 
-<section class="section dashboard">
+<div class="container">
 
     <h1>Executive Validation Dashboard</h1>
 
-    <p>
-        Real-time visibility into requirements, criticality,
-        lifecycle status, and AI recommendations.
+    <p class="subtitle">
+        AI-driven validation readiness and lifecycle management.
     </p>
 
     <div class="cards">
 
         <div class="card">
+
             <h2>{{ dashboard.total_requirements }}</h2>
+
             <p>Total Requirements</p>
+
         </div>
 
         <div class="card">
-            <h2>{{ dashboard.open_requirements }}</h2>
-            <p>Open Requirements</p>
-        </div>
 
-        <div class="card">
             <h2>{{ dashboard.critical_requirements }}</h2>
+
             <p>Critical Requirements</p>
+
         </div>
 
         <div class="card">
+
+            <h2>{{ dashboard.open_requirements }}</h2>
+
+            <p>Open Requirements</p>
+
+        </div>
+
+        <div class="card">
+
             <h2>{{ dashboard.readiness_score }}%</h2>
+
             <p>{{ dashboard.readiness_status }}</p>
+
         </div>
 
     </div>
 
-</section>
-
-<section class="section">
-
-    <h2>Qualification Lifecycle</h2>
+    <h2>Validation Analytics</h2>
 
     <div class="cards">
 
-        {% for stage in dashboard.lifecycle %}
-
         <div class="card">
 
-            <strong>{{ stage.stage }}</strong>
+            <h3>Criticality Distribution</h3>
 
-            <p>{{ stage.status }}</p>
+            <canvas id="criticalityChart"></canvas>
 
         </div>
 
-        {% endfor %}
+        <div class="card">
+
+            <h3>Category Distribution</h3>
+
+            <canvas id="categoryChart"></canvas>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Lifecycle Phase Distribution</h3>
+
+            <canvas id="phaseChart"></canvas>
+
+        </div>
 
     </div>
 
-</section>
+    <h2>Lifecycle</h2>
 
-<section class="section">
+    <table class="table">
 
-    <h2>Requirements</h2>
+        <thead>
 
-    <table style="width:100%; border-collapse:collapse;">
+            <tr>
 
-        <tr>
-            <th align="left">ID</th>
-            <th align="left">Requirement</th>
-            <th align="left">Category</th>
-            <th align="left">Recommended</th>
-            <th align="left">Verified</th>
-        </tr>
+                <th>Stage</th>
+                <th>Status</th>
 
-        {% for req in dashboard.requirements %}
+            </tr>
 
-        <tr>
+        </thead>
 
-            <td>{{ req.req_id }}</td>
+        <tbody>
 
-            <td>{{ req.text }}</td>
+        {% for stage in dashboard.lifecycle %}
 
-            <td>{{ req.category }}</td>
+            <tr>
 
-            <td>{{ req.recommended }}</td>
+                <td>{{ stage.stage }}</td>
 
-            <td>{{ req.verified }}</td>
+                <td>{{ stage.status }}</td>
 
-        </tr>
+            </tr>
 
         {% endfor %}
 
+        </tbody>
+
     </table>
 
-</section>
+    <h2>Requirements</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Requirement</th>
+                <th>Category</th>
+                <th>Criticality</th>
+                <th>Recommended Verification</th>
+                <th>Status</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for req in dashboard.requirements %}
+
+            <tr>
+
+                <td>{{ req.req_id }}</td>
+
+                <td>{{ req.text }}</td>
+
+                <td>{{ req.category }}</td>
+
+                <td>{{ req.criticality }}</td>
+
+                <td>{{ req.recommended_verification }}</td>
+
+                <td>
+
+                    {% if req.status == "Verified" %}
+
+                        ✅ Verified
+
+                    {% elif req.status == "In Progress" %}
+
+                        ⏳ In Progress
+
+                    {% else %}
+
+                        ❌ Open
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="ai-box">
+
+        <h2>AI Executive Summary</h2>
+
+        <p>{{ dashboard.ai_summary }}</p>
+
+    </div>
+
+    <div class="ai-box">
+
+        <h2>Gap Analysis</h2>
+
+        <pre>{{ dashboard.ai_gap_analysis }}</pre>
+
+    </div>
+
+    <div class="ai-box">
+
+        <h2>Recommendations</h2>
+
+        <pre>{{ dashboard.ai_recommendations }}</pre>
+
+    </div>
+
+</div>
+
+<script>
+    const charts = {{ dashboard.charts | tojson }};
+
+    new Chart(document.getElementById("criticalityChart"), {
+        type: "doughnut",
+        data: {
+            labels: charts.criticality_labels,
+            datasets: [{
+                label: "Criticality",
+                data: charts.criticality_values
+            }]
+        }
+    });
+
+    new Chart(document.getElementById("categoryChart"), {
+        type: "bar",
+        data: {
+            labels: charts.category_labels,
+            datasets: [{
+                label: "Requirements",
+                data: charts.category_values
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("phaseChart"), {
+        type: "pie",
+        data: {
+            labels: charts.phase_labels,
+            datasets: [{
+                label: "Phase",
+                data: charts.phase_values
+            }]
+        }
+    });
+</script>
 
 </body>
+
 </html>

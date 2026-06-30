@@ -1,34 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+    <meta charset="UTF-8">
+
     <title>CQVIP Login</title>
+
     <link rel="stylesheet" href="/static/style.css">
+
 </head>
+
 <body>
 
-<section class="section">
-    <h1>CQVIP Login</h1>
+<div class="login-container">
 
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
+    <div class="login-card">
 
-    <form method="post" action="/login">
-        <p>
-            <label>Username</label><br>
-            <input type="text" name="username">
+        <h1>CQVIP</h1>
+
+        <p class="subtitle">
+
+            Commissioning • Qualification • Validation Intelligence Platform
+
         </p>
 
-        <p>
-            <label>Password</label><br>
-            <input type="password" name="password">
-        </p>
+        {% if error %}
 
-        <button type="submit">Login</button>
-    </form>
+        <div class="error">
 
-    <p>Demo login: demo / demo123</p>
-</section>
+            {{ error }}
+
+        </div>
+
+        {% endif %}
+
+        <form
+            action="/login"
+            method="post"
+        >
+
+            <label>
+
+                Username
+
+            </label>
+
+            <input
+                type="text"
+                name="username"
+                required
+            >
+
+            <label>
+
+                Password
+
+            </label>
+
+            <input
+                type="password"
+                name="password"
+                required
+            >
+
+            <button
+                type="submit"
+                class="button"
+            >
+
+                Login
+
+            </button>
+
+        </form>
+
+        <div class="demo-box">
+
+            <strong>Demo Credentials</strong>
+
+            <br><br>
+
+            Username:
+            <code>demo</code>
+
+            <br>
+
+            Password:
+            <code>demo123</code>
+
+        </div>
+
+    </div>
+
+</div>
 
 </body>
+
 </html>

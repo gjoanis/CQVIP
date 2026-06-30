@@ -2,27 +2,79 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <title>Upload URS</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
 </head>
 
 <body>
 
-    <h1>Upload URS Document</h1>
+<nav class="navbar">
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
+    <div class="logo">
+        CQVIP
+    </div>
 
-        <input type="file" name="file">
+    <div class="nav-links">
+
+        <a href="/dashboard">Dashboard</a>
+
+        <a href="/upload">Upload</a>
+
+    </div>
+
+</nav>
+
+<div class="container">
+
+    <h1>Upload User Requirements Specification</h1>
+
+    <p class="subtitle">
+
+        Upload a URS document for AI requirement extraction,
+        classification, traceability and protocol generation.
+
+    </p>
+
+    <form
+        action="/upload-document"
+        method="post"
+        enctype="multipart/form-data"
+        class="upload-form"
+    >
+
+        <input
+            type="file"
+            name="file"
+            accept=".docx"
+            required
+        >
 
         <br><br>
 
-        <button type="submit">Upload URS</button>
+        <button
+            type="submit"
+            class="button"
+        >
+            Analyze URS
+        </button>
 
     </form>
 
     <br>
 
-    <a href="/">Back to Home</a>
+    <a
+        href="/dashboard"
+        class="button secondary"
+    >
+        Return to Dashboard
+    </a>
+
+</div>
 
 </body>
 

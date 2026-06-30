@@ -3,6 +3,7 @@ import re
 from app.models.requirement import Requirement
 from app.services.ai_requirement_analyzer import AIRequirementAnalyzer
 
+
 class URSParser:
     """
     Extracts requirements from URS text.
@@ -12,47 +13,6 @@ class URSParser:
     def __init__(self, text):
         self.text = text
 
-    def categorize(self, requirement_text):
-        text = requirement_text.lower()
-
-        if "alarm" in text:
-            return "Alarm"
-        elif "temperature" in text or "pressure" in text:
-            return "Environmental"
-        elif "clean" in text:
-            return "Cleaning"
-        elif "data" in text or "record" in text:
-            return "Data Integrity"
-        elif "operator" in text or "training" in text:
-            return "Operational"
-        elif "safety" in text:
-            return "Safety"
-        else:
-            return "Functional"
-
-    def recommend_verification(self, category):
-        if category == "Alarm":
-            return "OQ"
-        elif category == "Cleaning":
-            return "OQ / PQ"
-        elif category == "Data Integrity":
-            return "CSV / OQ"
-        elif category == "Environmental":
-            return "OQ"
-        elif category == "Safety":
-            return "OQ"
-        elif category == "Operational":
-            return "SOP / Training"
-        else:
-            return "Commissioning / IQ / OQ"
-
-    def assign_criticality(self, category):
-        if category in ["Alarm", "Safety", "Data Integrity"]:
-            return "Critical"
-        elif category in ["Cleaning", "Environmental"]:
-            return "Major"
-        else:
-            return "Minor"
     def extract_requirement_id(self, line, counter):
         match = re.match(
             r"^(URS[-_ ]?\d+|REQ[-_ ]?\d+|FRS[-_ ]?\d+|DS[-_ ]?\d+)\s*[-:|]*\s*(.*)",
@@ -70,6 +30,16 @@ class URSParser:
             return req_id, req_text
 
         return f"URS-{counter:03}", line
+
+    def assign_demo_status(self, index):
+        pattern = [
+            "Verified",
+            "In Progress",
+            "Open",
+        ]
+
+        return pattern[index % 3]
+
     def extract_requirements(self):
         requirements = []
         counter = 1
@@ -85,15 +55,14 @@ class URSParser:
             lowered = line.lower()
 
             is_requirement = (
-                    "shall" in lowered
-                    or "must" in lowered
-                    or re.match(r"^(URS|REQ|FRS|DS)[-_ ]?\d+", line, re.IGNORECASE)
+                "shall" in lowered
+                or "must" in lowered
+                or re.match(r"^(URS|REQ|FRS|DS)[-_ ]?\d+", line, re.IGNORECASE)
             )
 
             if not is_requirement:
                 continue
 
-            # Skip generic instructional text
             skip_phrases = [
                 "this document sets forth",
                 "requirement mandated",
@@ -103,7 +72,7 @@ class URSParser:
                 "shall be the contractor’s responsibility",
                 "shall be the contractor's responsibility",
                 "turnover package shall be supplied",
-                "requirement specification identification"
+                "requirement specification identification",
             ]
 
             if any(phrase in lowered for phrase in skip_phrases):
@@ -127,7 +96,7 @@ class URSParser:
             requirement = Requirement(
                 req_id,
                 req_text,
-                category
+                category,
             )
 
             requirement.risk = analysis.get("risk")
@@ -138,9 +107,17 @@ class URSParser:
             requirement.protocol_section = analysis.get("protocol_section")
             requirement.test_steps = analysis.get("test_steps", [])
             requirement.objective_evidence = analysis.get("objective_evidence", [])
+
             requirement.set_recommended_verification(verification)
             requirement.set_criticality(criticality)
+
+            status = self.assign_demo_status(counter - 1)
+
+            requirement.status = status
+            requirement.verified = status == "Verified"
+
             requirements.append(requirement)
+
             counter += 1
 
         return requirements
