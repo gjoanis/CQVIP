@@ -32,7 +32,19 @@ class Requirement:
         self.protocol_section = None
         self.test_steps = []
         self.objective_evidence = []
+        self.regulatory_sources = []
+        self.regulatory_rationale = None
         self.links = VerificationLink(req_id)
+
+        self.lifecycle_tests = {
+            "DQ": [],
+            "FAT": [],
+            "SAT": [],
+            "Commissioning": [],
+            "IQ": [],
+            "OQ": [],
+            "PQ": []
+        }
 
     def mark_verified(self, test_id):
         self.verified = True
@@ -40,6 +52,13 @@ class Requirement:
         self.links.add_test(test_id)
 
     def add_trace_link(self, test_id):
+        self.links.add_test(test_id)
+
+    def add_lifecycle_test(self, phase, test_id):
+        if phase not in self.lifecycle_tests:
+            self.lifecycle_tests[phase] = []
+
+        self.lifecycle_tests[phase].append(test_id)
         self.links.add_test(test_id)
 
     def set_recommended_verification(self, verification):

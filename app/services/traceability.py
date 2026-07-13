@@ -20,6 +20,17 @@ class TraceabilityService:
                 print("Verified    :", requirement.verified)
                 print("Verified By :", requirement.verified_by)
 
+                print("GMP Ref     :", requirement.gmp_reference)
+                print("Acceptance :", requirement.acceptance_criteria)
+
+                if requirement.regulatory_sources:
+                    print("Reg Sources:")
+                    for source in requirement.regulatory_sources:
+                        print(" -", source)
+
+                if requirement.regulatory_rationale:
+                    print("Rationale  :", requirement.regulatory_rationale)
+
                 for test in requirement.links.tests:
                     print("Trace Link  :", test)
 

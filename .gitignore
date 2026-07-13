@@ -22,3 +22,9 @@ documents/
 
 # Secrets
 .env
+
+# Generated vector database
+knowledge_base/vector_db/
+
+# Generated exports
+Traceability_Matrix_DEV.xlsx

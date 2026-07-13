@@ -12,6 +12,7 @@ class URSParser:
 
     def __init__(self, text):
         self.text = text
+        self.ai = AIRequirementAnalyzer()
 
     def extract_requirement_id(self, line, counter):
         match = re.match(
@@ -86,8 +87,7 @@ class URSParser:
             if len(req_text) < 20:
                 continue
 
-            ai = AIRequirementAnalyzer()
-            analysis = ai.analyze(req_text)
+            analysis = self.ai.analyze(req_text)
 
             category = analysis["category"]
             verification = analysis["verification"]
@@ -107,6 +107,9 @@ class URSParser:
             requirement.protocol_section = analysis.get("protocol_section")
             requirement.test_steps = analysis.get("test_steps", [])
             requirement.objective_evidence = analysis.get("objective_evidence", [])
+
+            requirement.regulatory_sources = analysis.get("regulatory_sources", [])
+            requirement.regulatory_rationale = analysis.get("regulatory_rationale")
 
             requirement.set_recommended_verification(verification)
             requirement.set_criticality(criticality)
