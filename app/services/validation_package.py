@@ -11,12 +11,16 @@ class ValidationPackage:
     def __init__(self):
         self.documents = []
 
+        self.base_dir = os.getcwd()
+
         self.output_folder = os.path.join(
+            self.base_dir,
             "exports",
             "Validation_Package"
         )
 
         self.zip_name = os.path.join(
+            self.base_dir,
             "exports",
             "Validation_Package"
         )
@@ -42,17 +46,28 @@ class ValidationPackage:
         ]
 
         for filename in generated_files:
-            if os.path.exists(filename):
+
+            source = os.path.join(
+                self.base_dir,
+                filename
+            )
+
+            if os.path.exists(source):
+
                 destination = os.path.join(
                     self.output_folder,
                     filename
                 )
 
-                shutil.copy(filename, destination)
+                shutil.copy2(
+                    source,
+                    destination
+                )
 
                 print(f"Added: {filename}")
+
             else:
-                print(f"Missing: {filename}")
+                print(f"Missing: {source}")
 
         shutil.make_archive(
             self.zip_name,
