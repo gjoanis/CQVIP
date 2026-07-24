@@ -213,3 +213,18 @@ h2{
     padding:18px;
     border-radius:8px;
 }
+
+.nav-button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+    margin-right:10px;
+}
+
+.nav-button:hover{
+    background:#1d4ed8;
+}
