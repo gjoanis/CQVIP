@@ -287,12 +287,27 @@ def generate_package():
 
     engine.run()
 
-    return FileResponse(
-        PACKAGE,
-        media_type="application/zip",
-        filename="Validation_Package.zip",
-    )
+    package_folder = EXPORTS / "Validation_Package"
 
+    if package_folder.exists():
+        shutil.make_archive(
+            str(package_folder),
+            "zip",
+            root_dir=package_folder,
+        )
+
+        generated_zip = EXPORTS / "Validation_Package.zip"
+
+        if generated_zip.exists():
+            return FileResponse(
+                generated_zip,
+                media_type="application/zip",
+                filename="Validation_Package.zip",
+            )
+
+    raise RuntimeError(
+        "Validation package was not generated."
+    )
 
 @app.get("/download")
 def download():
