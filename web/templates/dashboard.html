@@ -2,15 +2,27 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>CQVIP Dashboard</title>
 
-    <link rel="stylesheet" href="/static/style.css">
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+
+    <link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/v/dt/dt-3.0.0/datatables.min.css"
+>
+<script src="https://cdn.datatables.net/v/dt/dt-3.0.0/datatables.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 
 <body>
@@ -21,181 +33,241 @@
         CQVIP
     </div>
 
-<div class="nav-links">
+    <div class="nav-links">
 
-    <a href="/dashboard">Dashboard</a>
+        <a href="/dashboard">
+            Dashboard
+        </a>
 
-    <a href="/upload">Upload URS</a>
+        <a href="/upload">
+            Upload URS
+        </a>
 
-    <form action="/generate-package" method="post" style="display:inline;">
-        <button type="submit" class="nav-button">
-            Generate Package
-        </button>
-    </form>
+        <form
+            action="/generate-package"
+            method="post"
+            style="display: inline;"
+        >
+            <button
+                type="submit"
+                class="nav-button"
+            >
+                Generate Package
+            </button>
+        </form>
 
-    <a href="/download">Download Package</a>
+        <a href="/download">
+            Download Package
+        </a>
 
-</div>
+    </div>
 
 </nav>
-
 <div class="container">
 
-    <h1>Executive Validation Dashboard</h1>
+    <h1>
+        Quality Compliance Readiness Dashboard
+    </h1>
 
     <p class="subtitle">
-        AI-driven validation readiness and lifecycle management.
+        AI-powered project readiness, inspection readiness, and compliance intelligence.
     </p>
 
-    <div class="cards">
+    <div class="cards" id="executiveCards">
 
         <div class="card">
-
-            <h2>{{ dashboard.total_requirements }}</h2>
-
-            <p>Total Requirements</p>
-
+            <h2>{{ dashboard.quality_compliance_readiness }}%</h2>
+            <p>Overall Quality Compliance Readiness</p>
         </div>
 
         <div class="card">
-
-            <h2>{{ dashboard.critical_requirements }}</h2>
-
-            <p>Critical Requirements</p>
-
+            <h2>{{ dashboard.inspection_readiness }}%</h2>
+            <p>Inspection Readiness</p>
         </div>
 
         <div class="card">
-
-            <h2>{{ dashboard.open_requirements }}</h2>
-
-            <p>Open Requirements</p>
-
+            <h2>{{ dashboard.current_phase }}</h2>
+            <p>Current Phase</p>
         </div>
 
         <div class="card">
-
-            <h2>{{ dashboard.readiness_score }}%</h2>
-
-            <p>{{ dashboard.readiness_status }}</p>
-
+            <h2>{{ dashboard.project_health }}</h2>
+            <p>Project Health</p>
         </div>
 
     </div>
 
-    <h2>Validation Analytics</h2>
+    <h2>
+        Phase Readiness
+    </h2>
 
     <div class="cards">
 
         <div class="card">
-
-            <h3>Criticality Distribution</h3>
-
-            <canvas id="criticalityChart"></canvas>
-
+            <h3>Phase 1</h3>
+            <h2>{{ dashboard.phase_readiness.phase1 }}%</h2>
+            <p>Requirements Readiness</p>
         </div>
 
         <div class="card">
-
-            <h3>Category Distribution</h3>
-
-            <canvas id="categoryChart"></canvas>
-
+            <h3>Phase 2</h3>
+            <h2>{{ dashboard.phase_readiness.phase2 }}%</h2>
+            <p>Design & Risk Readiness</p>
         </div>
 
         <div class="card">
+            <h3>Phase 3</h3>
+            <h2>{{ dashboard.phase_readiness.phase3 }}%</h2>
+            <p>Execution Readiness</p>
+        </div>
 
-            <h3>Lifecycle Phase Distribution</h3>
+        <div class="card">
+            <h3>Phase 4</h3>
+            <h2>{{ dashboard.phase_readiness.phase4 }}%</h2>
+            <p>Verification & Evidence</p>
+        </div>
 
-            <canvas id="phaseChart"></canvas>
-
+        <div class="card">
+            <h3>Phase 5</h3>
+            <h2>{{ dashboard.phase_readiness.phase5 }}%</h2>
+            <p>Completion & Release</p>
         </div>
 
     </div>
 
-    <h2>Lifecycle</h2>
+        <div class="card">
 
-    <table class="table">
+            <h2 id="criticalRequirements">
+                {{ dashboard.critical_requirements }}
+            </h2>
 
-        <thead>
+            <p>
+                Critical Requirements
+            </p>
 
-            <tr>
+        </div>
 
-                <th>Stage</th>
-                <th>Status</th>
+        <div class="card">
 
-            </tr>
+            <h2 id="openRequirements">
+                {{ dashboard.open_requirements }}
+            </h2>
 
-        </thead>
+            <p>
+                Open Requirements
+            </p>
 
-        <tbody>
+        </div>
 
-        {% for stage in dashboard.lifecycle %}
+    <!-- Requirements -->
 
-            <tr>
+    <h2>
+        Requirements
+    </h2>
 
-                <td>{{ stage.stage }}</td>
-
-                <td>{{ stage.status }}</td>
-
-            </tr>
-
-        {% endfor %}
-
-        </tbody>
-
-    </table>
-
-    <h2>Requirements</h2>
-
-    <table class="table">
+   <table
+    id="requirementsTable"
+    class="table display"
+>
 
         <thead>
 
             <tr>
-
                 <th>ID</th>
                 <th>Requirement</th>
                 <th>Category</th>
                 <th>Criticality</th>
                 <th>Recommended Verification</th>
                 <th>Status</th>
-
             </tr>
 
         </thead>
 
-        <tbody>
+        <tbody id="requirementsTableBody">
 
         {% for req in dashboard.requirements %}
 
             <tr>
 
-                <td>{{ req.req_id }}</td>
+                <td>
+                    {{ req.req_id }}
+                </td>
 
-                <td>{{ req.text }}</td>
+                <td>
+    <a href="#"
+       onclick="openRequirement('{{ req.req_id }}'); return false;">
+        {{ req.text }}
+    </a>
+</td>
 
-                <td>{{ req.category }}</td>
+                <td>
+                    {{ req.category }}
+                </td>
 
-                <td>{{ req.criticality }}</td>
+                <td>
+                    {{ req.criticality }}
+                </td>
 
-                <td>{{ req.recommended_verification }}</td>
+                <td>
+                    {{ req.recommended_verification }}
+                </td>
 
                 <td>
 
-                    {% if req.status == "Verified" %}
+                    <select
+                        onchange="updateStatus('{{ req.req_id }}', this.value)"
+                    >
 
-                        ✅ Verified
+                        <option
+                            value="Open"
+                            {% if req.status == "Open" %}selected{% endif %}
+                        >
+                            Open
+                        </option>
 
-                    {% elif req.status == "In Progress" %}
+                        <option
+                            value="Assigned"
+                            {% if req.status == "Assigned" %}selected{% endif %}
+                        >
+                            Assigned
+                        </option>
 
-                        ⏳ In Progress
+                        <option
+                            value="In Progress"
+                            {% if req.status == "In Progress" %}selected{% endif %}
+                        >
+                            In Progress
+                        </option>
 
-                    {% else %}
+                        <option
+                            value="Under Review"
+                            {% if req.status == "Under Review" %}selected{% endif %}
+                        >
+                            Under Review
+                        </option>
 
-                        ❌ Open
+                        <option
+                            value="Verified"
+                            {% if req.status == "Verified" %}selected{% endif %}
+                        >
+                            Verified
+                        </option>
 
-                    {% endif %}
+                        <option
+                            value="Approved"
+                            {% if req.status == "Approved" %}selected{% endif %}
+                        >
+                            Approved
+                        </option>
+
+                        <option
+                            value="Closed"
+                            {% if req.status == "Closed" %}selected{% endif %}
+                        >
+                            Closed
+                        </option>
+
+                    </select>
 
                 </td>
 
@@ -207,75 +279,657 @@
 
     </table>
 
+
+    <!-- AI Executive Summary -->
+
+    {% if dashboard.ai_summary %}
+
     <div class="ai-box">
 
-        <h2>AI Executive Summary</h2>
+        <h2>
+            AI Executive Summary
+        </h2>
 
-        <p>{{ dashboard.ai_summary }}</p>
+        <p id="aiSummary">
+            {{ dashboard.ai_summary }}
+        </p>
 
     </div>
 
+    {% endif %}
+
+
+    <!-- Gap Analysis -->
+
     <div class="ai-box">
 
-        <h2>Gap Analysis</h2>
+        <h2>
+            Gap Analysis
+        </h2>
 
-        <pre>{{ dashboard.ai_gap_analysis }}</pre>
+        <p class="subtitle">
+            AI-generated assessment of validation gaps, risk, priority, and required verification.
+        </p>
+
+        <div style="overflow-x: auto;">
+
+            <table
+    id="gapAnalysisTable"
+    class="table display"
+>
+
+                <thead>
+
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Category</th>
+                        <th>Criticality</th>
+                        <th>Status</th>
+                        <th>Gap</th>
+                        <th>Risk</th>
+                        <th>Recommendation</th>
+                        <th>Priority</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="gapAnalysisTableBody">
+
+                {% for gap in dashboard.ai_gap_analysis %}
+
+                    <tr>
+
+                        <td>
+                            {{ gap.requirement }}
+                        </td>
+
+                        <td>
+                            {{ gap.category }}
+                        </td>
+
+                        <td>
+                            {{ gap.criticality }}
+                        </td>
+
+                        <td>
+                            {{ gap.status }}
+                        </td>
+
+                        <td>
+                            {{ gap.gap }}
+                        </td>
+
+                        <td>
+                            {{ gap.risk }}
+                        </td>
+
+                        <td>
+                            {{ gap.recommendation }}
+                        </td>
+
+                        <td>
+
+                            {% if gap.priority == "Critical" %}
+
+                                <span class="priority-badge priority-critical">
+                                    Critical
+                                </span>
+
+                            {% elif gap.priority == "Medium" %}
+
+                                <span class="priority-badge priority-medium">
+                                    Medium
+                                </span>
+
+                            {% else %}
+
+                                <span class="priority-badge priority-low">
+                                    Low
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
+
+    <!-- Validation Action Queue -->
+
     <div class="ai-box">
 
-        <h2>Recommendations</h2>
+        <h2>
+            Validation Action Queue
+        </h2>
 
-        <pre>{{ dashboard.ai_recommendations }}</pre>
+        <p class="subtitle">
+            Prioritized validation work generated from open requirements and identified gaps.
+        </p>
+
+        <div style="overflow-x: auto;">
+
+            <table
+    id="actionQueueTable"
+    class="table display"
+>
+
+                <thead>
+
+                    <tr>
+                        <th>Priority</th>
+                        <th>Requirement</th>
+                        <th>Action Required</th>
+                        <th>Owner</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="actionQueueTableBody">
+
+                {% for gap in dashboard.ai_gap_analysis %}
+
+                    {% if gap.status not in ["Verified", "Approved", "Closed"] %}
+
+                    <tr>
+
+                        <td>
+
+                            {% if gap.priority == "Critical" %}
+
+                                <span class="priority-badge priority-critical">
+                                    Critical
+                                </span>
+
+                            {% elif gap.priority == "Medium" %}
+
+                                <span class="priority-badge priority-medium">
+                                    Medium
+                                </span>
+
+                            {% else %}
+
+                                <span class="priority-badge priority-low">
+                                    Low
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ gap.requirement }}
+                        </td>
+
+                        <td>
+                            {{ gap.recommendation }}
+                        </td>
+
+                        <td>
+                            Unassigned
+                        </td>
+
+                        <td>
+                            —
+                        </td>
+
+                        <td>
+                            {{ gap.status }}
+                        </td>
+
+                    </tr>
+
+                    {% endif %}
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
 </div>
 
+<script src="https://cdn.datatables.net/v/dt/dt-3.0.0/datatables.min.js"></script>
 <script>
-    const charts = {{ dashboard.charts | tojson }};
 
-    new Chart(document.getElementById("criticalityChart"), {
-        type: "doughnut",
-        data: {
-            labels: charts.criticality_labels,
-            datasets: [{
-                label: "Criticality",
-                data: charts.criticality_values
-            }]
+    let dashboardVersion = "";
+
+    function escapeHtml(value) {
+
+        if (value === null || value === undefined) {
+            return "";
         }
-    });
 
-    new Chart(document.getElementById("categoryChart"), {
-        type: "bar",
-        data: {
-            labels: charts.category_labels,
-            datasets: [{
-                label: "Requirements",
-                data: charts.category_values
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function buildStatusOptions(currentStatus) {
+
+        const statuses = [
+            "Open",
+            "Assigned",
+            "In Progress",
+            "Under Review",
+            "Verified",
+            "Approved",
+            "Closed"
+        ];
+
+        return statuses
+            .map(status => {
+
+                const selected =
+                    status === currentStatus
+                        ? "selected"
+                        : "";
+
+                return `
+                    <option
+                        value="${escapeHtml(status)}"
+                        ${selected}
+                    >
+                        ${escapeHtml(status)}
+                    </option>
+                `;
+            })
+            .join("");
+    }
+
+
+    function getPriorityBadge(priority) {
+
+        if (priority === "Critical") {
+
+            return `
+                <span class="priority-badge priority-critical">
+                    Critical
+                </span>
+            `;
+        }
+
+        if (priority === "Medium") {
+
+            return `
+                <span class="priority-badge priority-medium">
+                    Medium
+                </span>
+            `;
+        }
+
+        return `
+            <span class="priority-badge priority-low">
+                Low
+            </span>
+        `;
+    }
+
+
+    function renderExecutiveCards(data) {
+
+        document.getElementById("totalRequirements").textContent =
+            data.total_requirements;
+
+        document.getElementById("criticalRequirements").textContent =
+            data.critical_requirements;
+
+        document.getElementById("openRequirements").textContent =
+            data.open_requirements;
+
+        document.getElementById("readinessScore").textContent =
+            data.readiness_score + "%";
+
+        document.getElementById("readinessStatus").textContent =
+            data.readiness_status;
+    }
+
+
+    function renderLifecycle(lifecycle) {
+
+        const tableBody =
+            document.getElementById("lifecycleTableBody");
+
+        tableBody.innerHTML = lifecycle
+            .map(stage => `
+                <tr>
+                    <td>
+                        ${escapeHtml(stage.stage)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(stage.status)}
+                    </td>
+                </tr>
+            `)
+            .join("");
+    }
+
+
+    function renderRequirements(requirements) {
+
+        const tableBody =
+            document.getElementById("requirementsTableBody");
+
+        tableBody.innerHTML = requirements
+            .map(requirement => `
+                <tr>
+
+                    <td>
+                        ${escapeHtml(requirement.req_id)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(requirement.text)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(requirement.category)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(requirement.criticality)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(requirement.recommended_verification)}
+                    </td>
+
+                    <td>
+
+                        <select
+                            onchange="updateStatus(
+                                '${escapeHtml(requirement.req_id)}',
+                                this.value
+                            )"
+                        >
+                            ${buildStatusOptions(requirement.status)}
+                        </select>
+
+                    </td>
+
+                </tr>
+            `)
+            .join("");
+    }
+
+
+    function renderGapAnalysis(gaps) {
+
+        const tableBody =
+            document.getElementById("gapAnalysisTableBody");
+
+        tableBody.innerHTML = gaps
+            .map(gap => `
+                <tr>
+
+                    <td>
+                        ${escapeHtml(gap.requirement)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.category)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.criticality)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.status)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.gap)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.risk)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.recommendation)}
+                    </td>
+
+                    <td>
+                        ${getPriorityBadge(gap.priority)}
+                    </td>
+
+                </tr>
+            `)
+            .join("");
+    }
+
+
+    function renderActionQueue(gaps) {
+
+        const tableBody =
+            document.getElementById("actionQueueTableBody");
+
+        const actionableGaps = gaps.filter(gap => {
+
+            return ![
+                "Verified",
+                "Approved",
+                "Closed"
+            ].includes(gap.status);
+        });
+
+        if (actionableGaps.length === 0) {
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        No open validation actions remain.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        tableBody.innerHTML = actionableGaps
+            .map(gap => `
+                <tr>
+
+                    <td>
+                        ${getPriorityBadge(gap.priority)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.requirement)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.recommendation)}
+                    </td>
+
+                    <td>
+                        Unassigned
+                    </td>
+
+                    <td>
+                        —
+                    </td>
+
+                    <td>
+                        ${escapeHtml(gap.status)}
+                    </td>
+
+                </tr>
+            `)
+            .join("");
+    }
+
+
+    function renderDashboard(data) {
+
+        renderExecutiveCards(data);
+
+        renderLifecycle(data.lifecycle);
+
+        renderRequirements(data.requirements);
+
+        renderGapAnalysis(data.ai_gap_analysis);
+
+        renderActionQueue(data.ai_gap_analysis);
+
+        const aiSummary =
+            document.getElementById("aiSummary");
+
+        if (aiSummary && data.ai_summary) {
+            aiSummary.textContent = data.ai_summary;
+        }
+    }
+
+    async function fetchDashboard() {
+
+        const response = await fetch(
+            "/api/dashboard",
+            {
+                cache: "no-store"
             }
-        }
-    });
+        );
 
-    new Chart(document.getElementById("phaseChart"), {
-        type: "pie",
-        data: {
-            labels: charts.phase_labels,
-            datasets: [{
-                label: "Phase",
-                data: charts.phase_values
-            }]
+        if (!response.ok) {
+            throw new Error("Unable to load dashboard data.");
         }
+
+        return await response.json();
+    }
+
+
+    async function updateStatus(reqId, status) {
+
+        try {
+
+            const response = await fetch(
+                "/api/update-status",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        req_id: reqId,
+                        status: status
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to save status.");
+            }
+
+            const data =
+                await fetchDashboard();
+
+            renderDashboard(data);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Unable to save the requirement status."
+            );
+        }
+    }
+
+
+    async function pollDashboard() {
+
+        try {
+
+            const response = await fetch(
+                "/api/dashboard-version",
+                {
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const version =
+                await response.json();
+
+            const currentVersion =
+                `${version.total}-${version.open}-${version.readiness}`;
+
+            if (
+                dashboardVersion !== "" &&
+                dashboardVersion !== currentVersion
+            ) {
+
+                const data =
+                    await fetchDashboard();
+
+                renderDashboard(data);
+            }
+
+            dashboardVersion =
+                currentVersion;
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard polling error:",
+                error
+            );
+        }
+    }
+
+    pollDashboard();
+
+    setInterval(
+        pollDashboard,
+        5000
+    );
+
+function initializeTable(tableId) {
+    return new DataTable(tableId, {
+        pageLength: 25,
+        responsive: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, "All"]
+        ]
     });
+}
+
+initializeTable("#requirementsTable");
+initializeTable("#gapAnalysisTable");
+initializeTable("#actionQueueTable");
+
+function openRequirement(reqId) {
+    window.location.href = "/requirement/" + reqId;
+}
+
 </script>
 
 </body>

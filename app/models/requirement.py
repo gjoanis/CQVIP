@@ -20,9 +20,32 @@ class Requirement:
         self.req_id = req_id
         self.text = text
         self.category = category
+
         self.criticality = None
         self.verified = False
         self.verified_by = None
+
+        # Workflow Status
+        self.status = "Open"
+
+        # Business Disposition
+        self.disposition = "Applicable"
+
+        # Assignment / Workflow
+        self.assigned_to = None
+        self.assigned_date = None
+        self.review_date = None
+        self.approved_by = None
+        self.closed_date = None
+        self.comments = None
+
+        # Applicability
+        self.na_reason = None
+        self.na_justification = None
+        self.na_approved_by = None
+        self.na_date = None
+
+        # AI Generated Content
         self.recommended_verification = None
         self.risk = None
         self.gmp_reference = None
@@ -30,10 +53,16 @@ class Requirement:
         self.suggested_test = None
         self.inspection_concern = None
         self.protocol_section = None
+        self.regulatory_rationale = None
+
+        # Evidence / Supporting Documentation
+        self.supporting_documents = []
+
+        # Generated Content
         self.test_steps = []
         self.objective_evidence = []
         self.regulatory_sources = []
-        self.regulatory_rationale = None
+
         self.links = VerificationLink(req_id)
 
         self.lifecycle_tests = {

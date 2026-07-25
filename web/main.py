@@ -10,6 +10,7 @@ from fastapi import (
     UploadFile,
     File,
     Form,
+    Body,
 )
 
 from fastapi.responses import (
@@ -25,8 +26,15 @@ from app.services.cqvip_engine import CQVIPEngine
 from app.services.dashboard_service import DashboardService
 from app.services.ai_protocol_generator import AIProtocolGenerator
 from app.services.traceability_engine import TraceabilityEngine
+from app.database.database import initialize_database
+from app.database.requirement_repository import RequirementRepository
+
+from app.database.supporting_document_repository import SupportingDocumentRepository
+
+from app.services.document_ai_service import DocumentAIService
 
 app = FastAPI(title="CQVIP")
+initialize_database()
 
 templates = Jinja2Templates(
     directory="web/templates"
@@ -47,6 +55,9 @@ app.mount(
 DOCUMENTS = Path("documents")
 DOCUMENTS.mkdir(exist_ok=True)
 
+SUPPORTING_DOCS = Path("supporting_documents")
+SUPPORTING_DOCS.mkdir(exist_ok=True)
+
 EXPORTS = Path("exports")
 EXPORTS.mkdir(exist_ok=True)
 
@@ -55,12 +66,10 @@ PACKAGE = EXPORTS / "Validation_Package.zip"
 
 def load_dashboard():
 
-    engine = CQVIPEngine()
-
-    engine.load_documents()
+    requirements = RequirementRepository.all()
 
     return DashboardService(
-        engine.requirements
+        requirements
     ).build()
 
 
@@ -107,6 +116,8 @@ def login(
             "error": "Invalid credentials"
         },
     )
+
+
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request):
 
@@ -117,6 +128,19 @@ def dashboard(request: Request):
         name="dashboard.html",
         context={
             "dashboard": dashboard
+        },
+    )
+
+@app.get("/requirement/{req_id}", response_class=HTMLResponse)
+def requirement_workspace(request: Request, req_id: str):
+
+    requirement = RequirementRepository.get(req_id)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="requirement.html",
+        context={
+            "requirement": requirement
         },
     )
 
@@ -178,6 +202,7 @@ async def upload_document(
     ai_results = AIURSAnalyzer().analyze(
         payload
     )
+
     for req in requirements:
 
         ai = next(
@@ -225,6 +250,8 @@ async def upload_document(
             [],
         )
 
+        RequirementRepository.save(req)
+
     dashboard = DashboardService(
         requirements
     ).build()
@@ -236,6 +263,82 @@ async def upload_document(
             "dashboard": dashboard
         },
     )
+
+@app.post("/api/update-status")
+def update_status(data: dict = Body(...)):
+
+    RequirementRepository.update_status(
+        data["req_id"],
+        data["status"],
+    )
+
+    return {
+        "success": True
+    }
+
+@app.post("/api/assign-owner")
+def assign_owner(data: dict = Body(...)):
+
+    RequirementRepository.assign_owner(
+        data["req_id"],
+        data["assigned_to"],
+    )
+
+    return {
+        "success": True
+    }
+
+@app.post("/api/upload-supporting-document")
+async def upload_supporting_document(
+    requirement_id: str = Form(...),
+    document_type: str = Form(...),
+    uploaded_by: str = Form(...),
+    file: UploadFile = File(...),
+):
+
+    destination = SUPPORTING_DOCS / file.filename
+
+    with open(destination, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    requirement = RequirementRepository.get(requirement_id)
+
+    ai_service = DocumentAIService()
+
+    analysis = ai_service.analyze_document(
+        requirement_text=requirement.text,
+        file_path=str(destination),
+    )
+
+    SupportingDocumentRepository.save(
+        requirement_id=requirement_id,
+        filename=file.filename,
+        document_type=document_type,
+        file_path=str(destination),
+        uploaded_by=uploaded_by,
+        ai_processed=True,
+        ai_summary=analysis["summary"],
+    )
+
+    return {
+        "success": True,
+        "analysis": analysis,
+    }
+
+@app.post("/api/mark-not-applicable")
+def mark_not_applicable(data: dict = Body(...)):
+
+    RequirementRepository.mark_not_applicable(
+        req_id=data["req_id"],
+        reason=data["reason"],
+        justification=data["justification"],
+        approved_by=data["approved_by"],
+    )
+
+    return {
+        "success": True
+    }
+
 @app.post("/generate-package")
 def generate_package():
 
@@ -290,6 +393,7 @@ def generate_package():
     package_folder = EXPORTS / "Validation_Package"
 
     if package_folder.exists():
+
         shutil.make_archive(
             str(package_folder),
             "zip",
@@ -299,6 +403,7 @@ def generate_package():
         generated_zip = EXPORTS / "Validation_Package.zip"
 
         if generated_zip.exists():
+
             return FileResponse(
                 generated_zip,
                 media_type="application/zip",
@@ -309,6 +414,7 @@ def generate_package():
         "Validation package was not generated."
     )
 
+
 @app.get("/download")
 def download():
 
@@ -317,13 +423,15 @@ def download():
         media_type="application/zip",
         filename="Validation_Package.zip",
     )
+
+
 @app.get("/health")
 def health():
 
     return {
         "status": "ok",
         "application": "CQVIP",
-        "version": "2.0"
+        "version": "2.0",
     }
 
 
@@ -332,6 +440,16 @@ def dashboard_api():
 
     return load_dashboard()
 
+@app.get("/api/dashboard-version")
+def dashboard_version():
+
+    dashboard = load_dashboard()
+
+    return {
+        "total": dashboard["total_requirements"],
+        "open": dashboard["open_requirements"],
+        "readiness": dashboard["quality_compliance_readiness"],
+    }
 
 @app.get("/api/traceability")
 def traceability_api():
