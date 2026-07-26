@@ -2,6 +2,7 @@ from datetime import datetime
 
 from app.database.database import get_connection
 from app.models.requirement import Requirement
+from app.repositories.evidence_repository import EvidenceRepository
 
 
 class RequirementRepository:
@@ -16,6 +17,9 @@ class RequirementRepository:
             INSERT OR REPLACE INTO requirements
             (
                 req_id,
+                source_req_id,
+                system_id,
+                document_id,
                 text,
                 category,
                 criticality,
@@ -39,16 +43,21 @@ class RequirementRepository:
                 na_reason,
                 na_justification,
                 na_approved_by,
-                na_date
+                na_date,
+                ai_processed,
+                ai_summary
             )
 
             VALUES
             (
-                ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+                ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
             )
             """,
             (
                 requirement.req_id,
+                getattr(requirement, "source_req_id", requirement.req_id),
+                requirement.system_id,
+                getattr(requirement, "document_id", None),
                 requirement.text,
                 requirement.category,
                 requirement.criticality,
@@ -73,87 +82,25 @@ class RequirementRepository:
                 getattr(requirement, "na_justification", None),
                 getattr(requirement, "na_approved_by", None),
                 getattr(requirement, "na_date", None),
+                1,
+                getattr(requirement, "regulatory_rationale", None),
             ),
         )
+
+        for evidence in getattr(requirement, "evidence", []):
+            EvidenceRepository.save(evidence)
 
         conn.commit()
         conn.close()
 
     @staticmethod
-    def all():
-
-        conn = get_connection()
-
-        rows = conn.execute(
-            """
-            SELECT *
-            FROM requirements
-            ORDER BY req_id
-            """
-        ).fetchall()
-
-        conn.close()
-
-        requirements = []
-
-        for row in rows:
-
-            req = Requirement(
-                req_id=row["req_id"],
-                text=row["text"],
-                category=row["category"],
-            )
-
-            req.criticality = row["criticality"]
-            req.recommended_verification = row["verification"]
-            req.status = row["status"]
-            req.disposition = row["disposition"] or "Applicable"
-            req.verified = bool(row["verified"])
-            req.risk = row["risk"]
-            req.gmp_reference = row["gmp_reference"]
-            req.acceptance_criteria = row["acceptance_criteria"]
-            req.suggested_test = row["suggested_test"]
-            req.inspection_concern = row["inspection_concern"]
-            req.protocol_section = row["protocol_section"]
-
-            req.assigned_to = row["assigned_to"]
-            req.assigned_date = row["assigned_date"]
-            req.review_date = row["review_date"]
-            req.verified_by = row["verified_by"]
-            req.approved_by = row["approved_by"]
-            req.closed_date = row["closed_date"]
-            req.comments = row["comments"]
-
-            req.na_reason = row["na_reason"]
-            req.na_justification = row["na_justification"]
-            req.na_approved_by = row["na_approved_by"]
-            req.na_date = row["na_date"]
-
-            requirements.append(req)
-
-        return requirements
-
-    @staticmethod
-    def get(req_id: str):
-
-        conn = get_connection()
-
-        row = conn.execute(
-            """
-            SELECT *
-            FROM requirements
-            WHERE req_id = ?
-            """,
-            (req_id,),
-        ).fetchone()
-
-        conn.close()
-
-        if not row:
-            return None
+    def _build_requirement(row):
 
         req = Requirement(
             req_id=row["req_id"],
+            source_req_id=row["source_req_id"],
+            system_id=row["system_id"],
+            document_id=row["document_id"],
             text=row["text"],
             category=row["category"],
         )
@@ -163,6 +110,7 @@ class RequirementRepository:
         req.status = row["status"]
         req.disposition = row["disposition"] or "Applicable"
         req.verified = bool(row["verified"])
+
         req.risk = row["risk"]
         req.gmp_reference = row["gmp_reference"]
         req.acceptance_criteria = row["acceptance_criteria"]
@@ -183,7 +131,59 @@ class RequirementRepository:
         req.na_approved_by = row["na_approved_by"]
         req.na_date = row["na_date"]
 
+        req.regulatory_rationale = row["ai_summary"]
+
+        req.evidence = EvidenceRepository.by_requirement(
+            req.req_id
+        )
+
+        req.verified = any(
+            evidence.verified
+            for evidence in req.evidence
+        ) or req.verified
+
         return req
+
+    @staticmethod
+    def all():
+
+        conn = get_connection()
+
+        rows = conn.execute(
+            """
+            SELECT *
+            FROM requirements
+            ORDER BY req_id
+            """
+        ).fetchall()
+
+        conn.close()
+
+        return [
+            RequirementRepository._build_requirement(row)
+            for row in rows
+        ]
+
+    @staticmethod
+    def get(req_id: str):
+
+        conn = get_connection()
+
+        row = conn.execute(
+            """
+            SELECT *
+            FROM requirements
+            WHERE req_id = ?
+            """,
+            (req_id,),
+        ).fetchone()
+
+        conn.close()
+
+        if row is None:
+            return None
+
+        return RequirementRepository._build_requirement(row)
 
     @staticmethod
     def update_status(req_id, status):

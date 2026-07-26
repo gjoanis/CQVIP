@@ -2,10 +2,10 @@ import json
 import os
 from pathlib import Path
 
-import pypdf
-from docx import Document
 from dotenv import load_dotenv
 from openai import OpenAI
+
+from app.parsers.document_loader import DocumentLoader
 
 load_dotenv()
 
@@ -20,48 +20,48 @@ class DocumentAIService:
 
     def extract_text(self, file_path: str) -> str:
 
-        suffix = Path(file_path).suffix.lower()
-
-        if suffix == ".pdf":
-            return self._extract_pdf(file_path)
-
-        if suffix == ".docx":
-            return self._extract_docx(file_path)
-
-        if suffix == ".txt":
-            return Path(file_path).read_text(
-                encoding="utf-8",
-                errors="ignore",
-            )
-
-        return ""
+        return DocumentLoader.load(file_path)
 
     def analyze_requirement(
+
         self,
+
         requirement_text: str,
+
         document_text: str,
+
+        document_type: str = "",
+
+        lifecycle_stage: str = "",
+
     ):
 
         prompt = f"""
-You are an FDA GMP validation expert.
+You are a senior GMP validation consultant.
+
+Lifecycle Stage:
+{lifecycle_stage}
+
+Document Type:
+{document_type}
 
 Requirement:
-
 {requirement_text}
 
 Supporting Document:
-
 {document_text[:12000]}
 
-Evaluate the document against the requirement.
+Evaluate whether the uploaded lifecycle document satisfies the requirement.
 
-Return JSON with exactly these fields:
+Return JSON only.
 
 {{
     "summary":"",
-    "match":"Full | Partial | None",
+    "match":"Full|Partial|None",
     "gap_analysis":"",
-    "recommendation":""
+    "recommendation":"",
+    "objective_evidence":[],
+    "inspection_risk":"Low|Medium|High"
 }}
 """
 
@@ -74,28 +74,48 @@ Return JSON with exactly these fields:
             },
 
             messages=[
+
                 {
+
                     "role": "system",
+
                     "content": (
-                        "You are a senior GMP validation "
-                        "consultant specializing in CQV."
+                        "You are an expert in FDA, EMA, Annex 11, Annex 15, "
+                        "GAMP 5, CQV, CSV, Data Integrity and GMP validation."
                     ),
+
                 },
+
                 {
+
                     "role": "user",
+
                     "content": prompt,
+
                 },
+
             ],
+
         )
 
         return json.loads(
+
             response.choices[0].message.content
+
         )
 
     def analyze_document(
+
         self,
+
         requirement_text: str,
+
         file_path: str,
+
+        document_type: str = "",
+
+        lifecycle_stage: str = "",
+
     ):
 
         text = self.extract_text(file_path)
@@ -103,45 +123,29 @@ Return JSON with exactly these fields:
         if not text.strip():
 
             return {
+
                 "summary": "",
+
                 "match": "None",
+
                 "gap_analysis": "Unable to extract document text.",
-                "recommendation": (
-                    "Verify the uploaded document."
-                ),
+
+                "recommendation": "Verify the uploaded document.",
+
+                "objective_evidence": [],
+
+                "inspection_risk": "High",
+
             }
 
         return self.analyze_requirement(
-            requirement_text,
-            text,
-        )
 
-    def _extract_pdf(
-        self,
-        file_path: str,
-    ):
+            requirement_text=requirement_text,
 
-        text = ""
+            document_text=text,
 
-        reader = pypdf.PdfReader(file_path)
+            document_type=document_type,
 
-        for page in reader.pages:
+            lifecycle_stage=lifecycle_stage,
 
-            page_text = page.extract_text()
-
-            if page_text:
-                text += page_text + "\n"
-
-        return text
-
-    def _extract_docx(
-        self,
-        file_path: str,
-    ):
-
-        document = Document(file_path)
-
-        return "\n".join(
-            paragraph.text
-            for paragraph in document.paragraphs
         )

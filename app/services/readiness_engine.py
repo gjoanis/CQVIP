@@ -11,154 +11,149 @@ class ReadinessEngine:
         if total == 0:
 
             return {
+
                 "overall_readiness": 0,
+
                 "inspection_readiness": 0,
-                "current_phase": "Phase 1",
+
+                "current_phase": "Planning & Requirements",
+
                 "project_health": "Green",
-                "phases": {
-                    "phase1": 0,
-                    "phase2": 0,
-                    "phase3": 0,
-                    "phase4": 0,
-                    "phase5": 0,
-                },
+
+                "phases": {},
+
             }
 
-        phase1 = self.phase1()
-        phase2 = self.phase2()
-        phase3 = self.phase3()
-        phase4 = self.phase4()
-        phase5 = self.phase5()
+        lifecycle_stages = [
 
-        overall = round(
-            (
-                phase1
-                + phase2
-                + phase3
-                + phase4
-                + phase5
-            ) / 5
+            "Planning & Requirements",
+
+            "Design Qualification",
+
+            "Factory Acceptance Testing",
+
+            "Site Acceptance Testing",
+
+            "Engineering Studies",
+
+            "Commissioning",
+
+            "Operational Readiness",
+
+            "Installation Qualification",
+
+            "Operational Qualification",
+
+            "Performance Qualification",
+
+            "Continued Verification",
+
+            "Retirement",
+
+        ]
+
+        phase_scores = {}
+
+        for stage in lifecycle_stages:
+
+            stage_requirements = [
+
+                r
+
+                for r in self.requirements
+
+                if getattr(r, "lifecycle_stage", None) == stage
+
+            ]
+
+            if not stage_requirements:
+
+                phase_scores[stage] = 0
+
+                continue
+
+            verified = sum(
+
+                1
+
+                for r in stage_requirements
+
+                if getattr(r, "verified", False)
+
+            )
+
+            phase_scores[stage] = round(
+
+                verified / len(stage_requirements) * 100
+
+            )
+
+        populated = [
+
+            score
+
+            for score in phase_scores.values()
+
+            if score > 0
+
+        ]
+
+        overall = (
+
+            round(sum(populated) / len(populated))
+
+            if populated
+
+            else 0
+
         )
 
-        if phase5 < 100:
-            current_phase = "Phase 5"
+        current_phase = "Completed"
 
-        elif phase4 < 100:
-            current_phase = "Phase 4"
+        for stage in lifecycle_stages:
 
-        elif phase3 < 100:
-            current_phase = "Phase 3"
+            if phase_scores[stage] < 100:
 
-        elif phase2 < 100:
-            current_phase = "Phase 2"
+                current_phase = stage
 
-        else:
-            current_phase = "Phase 1"
+                break
 
         if overall >= 85:
+
             health = "Green"
 
         elif overall >= 60:
+
             health = "Yellow"
 
         else:
+
             health = "Red"
+
+        inspection = round(
+
+            (
+
+                phase_scores["Installation Qualification"]
+
+                + phase_scores["Operational Qualification"]
+
+                + phase_scores["Performance Qualification"]
+
+            ) / 3
+
+        )
 
         return {
 
             "overall_readiness": overall,
 
-            "inspection_readiness": phase4,
+            "inspection_readiness": inspection,
 
             "current_phase": current_phase,
 
             "project_health": health,
 
-            "phases": {
-
-                "phase1": phase1,
-
-                "phase2": phase2,
-
-                "phase3": phase3,
-
-                "phase4": phase4,
-
-                "phase5": phase5,
-
-            },
+            "phases": phase_scores,
 
         }
-
-    def phase1(self):
-
-        completed = 0
-
-        for req in self.requirements:
-
-            if (
-                req.category
-                and req.criticality
-                and req.recommended_verification
-            ):
-                completed += 1
-
-        return round(completed / len(self.requirements) * 100)
-
-    def phase2(self):
-
-        completed = 0
-
-        for req in self.requirements:
-
-            if req.risk and req.gmp_reference:
-
-                completed += 1
-
-        return round(completed / len(self.requirements) * 100)
-
-    def phase3(self):
-
-        completed = 0
-
-        for req in self.requirements:
-
-            if req.status in [
-
-                "Assigned",
-
-                "Under Review",
-
-                "Verified",
-
-                "Closed",
-
-            ]:
-
-                completed += 1
-
-        return round(completed / len(self.requirements) * 100)
-
-    def phase4(self):
-
-        completed = 0
-
-        for req in self.requirements:
-
-            if req.verified:
-
-                completed += 1
-
-        return round(completed / len(self.requirements) * 100)
-
-    def phase5(self):
-
-        completed = 0
-
-        for req in self.requirements:
-
-            if req.status == "Closed":
-
-                completed += 1
-
-        return round(completed / len(self.requirements) * 100)

@@ -2,75 +2,87 @@ from app.services.readiness_engine import ReadinessEngine
 
 
 class AIInsights:
-    """
-    AI-generated project insights supporting Requirement objects
-    and dictionaries.
-    """
 
     def __init__(self, requirements):
+
         self.requirements = requirements
 
     def value(self, req, field, default=""):
+
         if isinstance(req, dict):
             return req.get(field, default)
+
         return getattr(req, field, default)
 
     def generate_project_summary(self):
 
-        readiness = ReadinessEngine(self.requirements).calculate()
+        readiness = ReadinessEngine(
+            self.requirements
+        ).calculate()
+
+        total = len(self.requirements)
+
+        if total == 0:
+
+            return (
+                "No project data is available. "
+                "Upload lifecycle documents to begin building the digital validation package."
+            )
 
         overall = readiness["overall_readiness"]
         inspection = readiness["inspection_readiness"]
         phase = readiness["current_phase"]
         health = readiness["project_health"]
 
-        total = len(self.requirements)
-
         critical = self.count_critical_requirements()
-
         open_items = self.count_open_requirements()
 
-        if total == 0:
-            return (
-                "No project data is currently available. "
-                "Upload a URS to begin calculating Quality Compliance Readiness."
-            )
-
         summary = (
-            f"Overall Quality Compliance Readiness is {overall}%. "
-            f"The project is currently in {phase}. "
+
+            f"Overall Lifecycle Readiness is {overall}%. "
+
+            f"The current lifecycle stage is {phase}. "
+
             f"Inspection Readiness is {inspection}%. "
+
             f"Project Health is {health}. "
+
         )
 
-        if critical > 0:
+        if critical:
+
             summary += (
-                f"There are {critical} Critical/High GMP requirements requiring close attention. "
+                f"{critical} Critical or High-risk requirements remain. "
             )
 
-        if open_items > 0:
+        if open_items:
+
             summary += (
-                f"{open_items} requirements still require verification before project completion. "
+                f"{open_items} requirements are still awaiting verification. "
             )
 
         if overall >= 90:
+
             summary += (
-                "The project is approaching inspection readiness with only minor activities remaining."
+                "The validation package is approaching inspection readiness."
             )
 
         elif overall >= 70:
+
             summary += (
-                "The project is progressing well but additional verification activities are required before release."
+                "The project is progressing well with several remaining verification activities."
             )
 
         elif overall >= 50:
+
             summary += (
-                "Execution is underway, however several compliance gaps remain that should be prioritized."
+                "Execution is underway, but compliance gaps still require attention."
             )
 
         else:
+
             summary += (
-                "The project is still in the early stages of the compliance lifecycle and significant work remains."
+                "The project is in the early stages of the validation lifecycle."
             )
 
         return summary
@@ -81,65 +93,85 @@ class AIInsights:
 
         for req in self.requirements:
 
-            verified = self.value(req, "verified", False)
+            verified = self.value(
+                req,
+                "verified",
+                False,
+            )
 
-            req_id = self.value(req, "req_id", "")
+            lifecycle = self.value(
+                req,
+                "lifecycle_stage",
+                "Unknown",
+            )
 
-            category = self.value(req, "category", "")
+            document = self.value(
+                req,
+                "document_type",
+                "Unknown",
+            )
 
-            criticality = self.value(req, "criticality", "")
+            req_id = self.value(
+                req,
+                "req_id",
+                "",
+            )
 
-            status = self.value(req, "status", "Open")
+            category = self.value(
+                req,
+                "category",
+                "",
+            )
 
-            phase = self.infer_phase(req)
+            criticality = self.value(
+                req,
+                "criticality",
+                "",
+            )
+
+            status = self.value(
+                req,
+                "status",
+                "Open",
+            )
 
             if verified:
 
                 gap = "None"
-
                 risk = "Low"
-
-                recommendation = "Requirement is fully verified."
-
+                recommendation = "Requirement verified."
                 priority = "Complete"
 
             else:
 
-                gap = "Evidence Missing"
+                gap = "Verification Evidence Missing"
 
                 if criticality in ["Critical", "High"]:
 
                     risk = "High"
-
-                    recommendation = (
-                        f"Complete {phase} verification and upload objective evidence."
-                    )
-
                     priority = "Critical"
 
                 elif criticality == "Medium":
 
                     risk = "Medium"
-
-                    recommendation = (
-                        f"Complete {phase} verification."
-                    )
-
                     priority = "Medium"
 
                 else:
 
                     risk = "Low"
-
-                    recommendation = (
-                        f"Complete {phase} verification."
-                    )
-
                     priority = "Low"
+
+                recommendation = (
+                    f"Complete verification within the {lifecycle} stage and update the {document}."
+                )
 
             gaps.append({
 
                 "requirement": req_id,
+
+                "lifecycle": lifecycle,
+
+                "document": document,
 
                 "category": category,
 
@@ -176,44 +208,11 @@ class AIInsights:
 
         if not recommendations:
 
-            return "No recommendations. Project is ready for release."
+            return (
+                "No recommendations. The current lifecycle documentation appears complete."
+            )
 
         return "\n".join(recommendations[:10])
-
-    def infer_phase(self, req):
-
-        recommended = self.value(
-            req,
-            "recommended_verification",
-            ""
-        )
-
-        if recommended:
-            return recommended
-
-        text = self.value(req, "text", "").lower()
-
-        if "install" in text or "utility" in text:
-            return "IQ"
-
-        if (
-            "alarm" in text
-            or "interlock" in text
-            or "record" in text
-            or "software" in text
-            or "data" in text
-        ):
-            return "OQ"
-
-        if (
-            "process" in text
-            or "performance" in text
-            or "clean" in text
-            or "cycle" in text
-        ):
-            return "PQ"
-
-        return "OQ"
 
     def count_critical_requirements(self):
 
@@ -226,7 +225,7 @@ class AIInsights:
             if self.value(
                 req,
                 "criticality",
-                ""
+                "",
             ) in ["Critical", "High"]
 
         )
@@ -242,7 +241,7 @@ class AIInsights:
             if not self.value(
                 req,
                 "verified",
-                False
+                False,
             )
 
         )

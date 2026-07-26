@@ -1,51 +1,104 @@
 class TraceabilityService:
     """
-    Handles traceability and gap analysis.
+    Generates lifecycle traceability matrices and gap analysis.
     """
 
     def __init__(self, asset):
         self.asset = asset
 
     def generate_matrix(self):
-        print("\nTRACEABILITY MATRIX")
-        print("-" * 45)
+
+        print("\nLIFECYCLE TRACEABILITY MATRIX")
+        print("=" * 80)
 
         for document in self.asset.documents:
-            for requirement in document.requirements:
-                print("Requirement :", requirement.req_id)
-                print("Text        :", requirement.text)
-                print("Category    :", requirement.category)
-                print("Criticality :", requirement.criticality)
-                print("Recommended:", requirement.recommended_verification)
-                print("Verified    :", requirement.verified)
-                print("Verified By :", requirement.verified_by)
 
-                print("GMP Ref     :", requirement.gmp_reference)
-                print("Acceptance :", requirement.acceptance_criteria)
+            print(f"\nDocument: {document.name}")
+
+            if hasattr(document, "document_type"):
+                print(f"Type: {document.document_type}")
+
+            if hasattr(document, "lifecycle_stage"):
+                print(f"Lifecycle Stage: {document.lifecycle_stage}")
+
+            print("-" * 80)
+
+            for requirement in document.requirements:
+
+                print(f"Requirement        : {requirement.req_id}")
+
+                if getattr(requirement, "source_req_id", None):
+                    print(f"Source Requirement : {requirement.source_req_id}")
+
+                print(f"Category           : {requirement.category}")
+
+                print(f"Criticality        : {requirement.criticality}")
+
+                print(f"Verification       : {requirement.recommended_verification}")
+
+                print(f"Status             : {requirement.status}")
+
+                print(f"Verified           : {requirement.verified}")
+
+                print(f"Verified By        : {requirement.verified_by}")
+
+                print(f"GMP Reference      : {requirement.gmp_reference}")
+
+                print(f"Acceptance Criteria: {requirement.acceptance_criteria}")
 
                 if requirement.regulatory_sources:
-                    print("Reg Sources:")
+
+                    print("Regulatory Sources")
+
                     for source in requirement.regulatory_sources:
-                        print(" -", source)
+                        print(f"  • {source}")
 
                 if requirement.regulatory_rationale:
-                    print("Rationale  :", requirement.regulatory_rationale)
 
-                for test in requirement.links.tests:
-                    print("Trace Link  :", test)
+                    print("Regulatory Rationale")
 
-                print("-" * 45)
+                    print(requirement.regulatory_rationale)
+
+                if requirement.links.tests:
+
+                    print("Verification Evidence")
+
+                    for test in requirement.links.tests:
+                        print(f"  • {test}")
+
+                print("-" * 80)
 
     def gap_analysis(self):
-        print("\nGAP ANALYSIS")
-        print("-" * 45)
+
+        print("\nLIFECYCLE GAP ANALYSIS")
+        print("=" * 80)
 
         gaps = 0
 
         for document in self.asset.documents:
-            for requirement in document.requirements:
-                if requirement.verified is False:
-                    gaps += 1
-                    print(requirement.req_id, "requires verification.")
 
-        print("Open Gaps:", gaps)
+            for requirement in document.requirements:
+
+                if requirement.verified:
+                    continue
+
+                gaps += 1
+
+                print(f"{requirement.req_id}")
+
+                if getattr(requirement, "source_req_id", None):
+                    print(f"Source Requirement : {requirement.source_req_id}")
+
+                if hasattr(document, "document_type"):
+                    print(f"Document Type      : {document.document_type}")
+
+                if hasattr(document, "lifecycle_stage"):
+                    print(f"Lifecycle Stage    : {document.lifecycle_stage}")
+
+                print(f"Status             : {requirement.status}")
+
+                print(f"Recommended Action : Complete verification and upload objective evidence.")
+
+                print("-" * 80)
+
+        print(f"\nOpen Gaps: {gaps}")

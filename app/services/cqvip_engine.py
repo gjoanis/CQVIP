@@ -1,219 +1,209 @@
-import os
+from pathlib import Path
 
 from app.config.project_config import ProjectConfig
 
-from app.models.project import Project
 from app.models.asset import Asset
 from app.models.document import Document
+from app.models.project import Project
 
 from app.parsers.urs_parser import URSParser
 
+from app.services.document_classifier import DocumentClassifier
+from app.services.project_loader import ProjectLoader
 from app.services.qualification_engine import QualificationEngine
 from app.services.traceability import TraceabilityService
 from app.services.inspection import InspectionService
 from app.services.test_generator import TestGenerator
-from app.services.project_scanner import ProjectScanner
-from app.services.project_loader import ProjectLoader
-from app.services.validation_package import ValidationPackage
-
-from app.reports.dashboard import DashboardReport
-
-from app.exporters.excel_trace_matrix import ExcelTraceMatrix
-from app.exporters.iq_protocol import IQProtocolExporter
-from app.exporters.oq_protocol import OQProtocolExporter
-from app.exporters.pq_protocol import PQProtocolExporter
-from app.exporters.fat_protocol import FATProtocolExporter
-from app.exporters.sat_protocol import SATProtocolExporter
-from app.exporters.commissioning_protocol import CommissioningProtocolExporter
-from app.exporters.qualification_summary_report import QualificationSummaryReportExporter
 
 
 class CQVIPEngine:
     """
-    Main orchestration engine for CQVIP.
+    Core orchestration engine for the CQVIP lifecycle platform.
     """
 
     def __init__(self, documents_folder="documents"):
+
         self.config = ProjectConfig()
+
         self.documents_folder = documents_folder
+
         self.reset_project()
 
     def reset_project(self):
+
         self.project = Project(self.config.PROJECT_NAME)
-        self.asset = Asset(self.config.ASSET_NAME, self.config.ASSET_TYPE)
+
+        self.asset = Asset(
+
+            self.config.ASSET_NAME,
+
+            self.config.ASSET_TYPE,
+
+        )
+
         self.requirements = []
+
         self.qualification_engine = QualificationEngine()
 
     def load_documents(self):
-        scanner = ProjectScanner(self.documents_folder)
-        files = scanner.scan()
 
-        loader = ProjectLoader()
-        loaded_documents = loader.load_project(files)
+        folder = Path(self.documents_folder)
 
-        self._load_parsed_documents(loaded_documents)
+        files = [
+
+            file
+
+            for file in folder.iterdir()
+
+            if file.is_file()
+
+        ]
+
+        self._load_files(files)
 
     def load_single_document(self, filepath):
+
+        self._load_files([Path(filepath)])
+
+    def _load_files(self, files):
+
         loader = ProjectLoader()
 
-        loaded_documents = loader.load_project(
-            [
-                {
-                    "path": filepath,
-                    "filename": os.path.basename(filepath)
-                }
-            ]
-        )
+        documents = loader.load_project(files)
 
-        self._load_parsed_documents(loaded_documents)
-
-    def _load_parsed_documents(self, loaded_documents):
         print("\nDISCOVERED DOCUMENTS")
-        print("-" * 45)
+        print("=" * 80)
 
-        for loaded_doc in loaded_documents:
-            print("Filename:", loaded_doc["filename"])
-            print("Type    :", loaded_doc["type"])
-            print("-" * 45)
+        for loaded_document in documents:
 
-            if loaded_doc["type"] == "URS":
-                urs = Document(
-                    loaded_doc["filename"],
-                    "URS"
-                )
+            metadata = DocumentClassifier.classify(
+
+                loaded_document.name,
+
+                loaded_document.text,
+
+            )
+
+            document = Document(
+
+                system_id=None,
+
+                lifecycle_stage_id=None,
+
+                document_type_id=None,
+
+                filename=loaded_document.filename,
+
+                file_path="",
+
+                title=loaded_document.name,
+
+            )
+
+            document.document_type = metadata["document_type"]
+
+            document.lifecycle_stage = metadata["lifecycle_stage"]
+
+            print(f"{document.name}")
+
+            print(f"Type   : {document.document_type}")
+
+            print(f"Stage  : {document.lifecycle_stage}")
+
+            if document.document_type == "User Requirements Specification":
 
                 parser = URSParser(
-                    loaded_doc["text"]
+
+                    loaded_document.text
+
                 )
 
-                parsed_requirements = parser.extract_requirements()
+                parsed = parser.extract_requirements()
 
-                for requirement in parsed_requirements:
-                    urs.add_requirement(requirement)
+                for requirement in parsed:
+
+                    requirement.document_name = document.name
+
+                    requirement.document_type = document.document_type
+
+                    requirement.lifecycle_stage = document.lifecycle_stage
+
+                    document.add_requirement(requirement)
+
                     self.requirements.append(requirement)
 
-                self.asset.add_document(urs)
-
-        if self.requirements:
-            self.requirements[0].mark_verified("OQ-001")
-            self.requirements[0].add_trace_link("IQ-001")
-            self.requirements[0].add_trace_link("FAT-001")
-            self.requirements[0].add_trace_link("SAT-001")
+            self.asset.add_document(document)
 
         self.project.add_asset(self.asset)
 
     def complete_lifecycle(self):
-        stages = [
-            "URS",
-            "SIA",
-            "FAT",
-            "SAT",
-            "Commissioning",
-            "IQ",
-            "OQ",
-            "PQ",
-            "QSR",
-            "Released"
-        ]
 
-        for stage in stages:
+        for stage in [
+
+            "Planning & Requirements",
+
+            "Design Qualification",
+
+            "Factory Acceptance Testing",
+
+            "Site Acceptance Testing",
+
+            "Commissioning",
+
+            "Installation Qualification",
+
+            "Operational Qualification",
+
+            "Performance Qualification",
+
+            "Continued Verification",
+
+        ]:
+
             self.qualification_engine.complete(stage)
 
-    def generate_documents(self):
-        test_generator = TestGenerator(self.requirements)
-        test_generator.generate_tests()
-
-        excel = ExcelTraceMatrix(self.requirements)
-
-        iq = IQProtocolExporter(
-            self.project,
-            self.asset
-        )
-
-        oq = OQProtocolExporter(
-            self.project,
-            self.asset,
-            self.requirements
-        )
-
-        pq = PQProtocolExporter(
-            self.project,
-            self.asset,
-            self.requirements
-        )
-
-        fat = FATProtocolExporter(
-            self.project,
-            self.asset
-        )
-
-        sat = SATProtocolExporter(
-            self.project,
-            self.asset
-        )
-
-        commissioning = CommissioningProtocolExporter(
-            self.project,
-            self.asset
-        )
-
-        summary = QualificationSummaryReportExporter(
-            self.project,
-            self.asset,
-            self.qualification_engine,
-            self.requirements
-        )
-
-        excel.export()
-        iq.generate()
-        oq.generate()
-        pq.generate()
-        fat.generate()
-        sat.generate()
-        commissioning.generate()
-        summary.generate()
-
-        validation_package = ValidationPackage()
-        validation_package.add(excel)
-        validation_package.add(iq)
-        validation_package.add(oq)
-        validation_package.add(pq)
-        validation_package.add(fat)
-        validation_package.add(sat)
-        validation_package.add(commissioning)
-        validation_package.add(summary)
-        validation_package.build()
-
     def display_reports(self):
-        dashboard = DashboardReport(
-            self.project,
+
+        TraceabilityService(
+
             self.asset
-        )
 
-        traceability = TraceabilityService(self.asset)
-        inspection = InspectionService(self.asset)
-        test_generator = TestGenerator(self.requirements)
+        ).generate_matrix()
 
-        dashboard.display()
-        self.qualification_engine.display_dashboard()
-        traceability.generate_matrix()
-        traceability.gap_analysis()
+        TraceabilityService(
 
-        test_generator.generate_tests()
-        test_generator.display_tests()
+            self.asset
 
-        inspection.check_readiness()
+        ).gap_analysis()
+
+        TestGenerator(
+
+            self.requirements
+
+        ).generate_tests()
+
+        InspectionService(
+
+            self.asset
+
+        ).check_readiness()
 
     def run(self):
+
         self.reset_project()
+
         self.load_documents()
+
         self.complete_lifecycle()
-        self.generate_documents()
+
         self.display_reports()
 
     def run_for_file(self, filepath):
+
         self.reset_project()
+
         self.load_single_document(filepath)
+
         self.complete_lifecycle()
-        self.generate_documents()
+
         self.display_reports()

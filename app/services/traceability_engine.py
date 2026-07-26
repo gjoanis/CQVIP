@@ -1,37 +1,66 @@
 class TraceabilityEngine:
     """
-    Creates a Requirement Traceability Matrix (RTM)
-    linking URS requirements to lifecycle verification.
+    Builds a complete lifecycle Requirement Traceability Matrix (RTM).
     """
 
-    DEFAULT_PHASES = {
-        "Environmental Control": "OQ",
-        "Utilities": "IQ",
-        "Equipment": "IQ",
-        "Automation": "OQ",
-        "Software": "CSV",
-        "Documentation": "Review",
-        "Safety": "IQ",
-        "Cleaning": "OQ",
-        "Process": "PQ",
-        "General": "IQ",
+    DEFAULT_VERIFICATION = {
+
+        "Planning & Requirements": "Review",
+
+        "Design Qualification": "DQ",
+
+        "Factory Acceptance Testing": "FAT",
+
+        "Site Acceptance Testing": "SAT",
+
+        "Engineering Studies": "Study",
+
+        "Commissioning": "Commissioning",
+
+        "Operational Readiness": "Review",
+
+        "Installation Qualification": "IQ",
+
+        "Operational Qualification": "OQ",
+
+        "Performance Qualification": "PQ",
+
+        "Continued Verification": "Periodic Review",
+
+        "Retirement": "Decommissioning",
+
     }
 
     def __init__(self, requirements):
+
         self.requirements = requirements
 
     def recommended_phase(self, requirement):
 
-        category = getattr(
+        stage = getattr(
             requirement,
-            "category",
-            "General"
+            "lifecycle_stage",
+            None,
         )
 
-        return self.DEFAULT_PHASES.get(
-            category,
-            "IQ"
+        if stage:
+
+            return self.DEFAULT_VERIFICATION.get(
+                stage,
+                "Review",
+            )
+
+        verification = getattr(
+            requirement,
+            "recommended_verification",
+            None,
         )
+
+        if verification:
+
+            return verification
+
+        return "Review"
 
     def build(self):
 
@@ -42,56 +71,157 @@ class TraceabilityEngine:
             matrix.append({
 
                 "Requirement ID":
-                    getattr(requirement, "req_id", ""),
+                    requirement.req_id,
+
+                "Source Requirement":
+                    getattr(
+                        requirement,
+                        "source_req_id",
+                        requirement.req_id,
+                    ),
+
+                "System ID":
+                    getattr(
+                        requirement,
+                        "system_id",
+                        "",
+                    ),
+
+                "Document ID":
+                    getattr(
+                        requirement,
+                        "document_id",
+                        "",
+                    ),
+
+                "Document":
+                    getattr(
+                        requirement,
+                        "document_name",
+                        "",
+                    ),
+
+                "Document Type":
+                    getattr(
+                        requirement,
+                        "document_type",
+                        "",
+                    ),
+
+                "Lifecycle Stage":
+                    getattr(
+                        requirement,
+                        "lifecycle_stage",
+                        "",
+                    ),
 
                 "Requirement":
-                    getattr(requirement, "text", ""),
+                    requirement.text,
 
                 "Category":
-                    getattr(requirement, "category", ""),
+                    getattr(
+                        requirement,
+                        "category",
+                        "",
+                    ),
 
                 "Criticality":
-                    getattr(requirement, "criticality", ""),
+                    getattr(
+                        requirement,
+                        "criticality",
+                        "",
+                    ),
 
-                "Verification":
+                "Risk":
+                    getattr(
+                        requirement,
+                        "risk",
+                        "",
+                    ),
+
+                "Recommended Verification":
                     getattr(
                         requirement,
                         "recommended_verification",
-                        ""
+                        "",
+                    ),
+
+                "Lifecycle Verification":
+                    self.recommended_phase(
+                        requirement,
+                    ),
+
+                "Protocol Section":
+                    getattr(
+                        requirement,
+                        "protocol_section",
+                        "",
                     ),
 
                 "Suggested Test":
                     getattr(
                         requirement,
                         "suggested_test",
-                        ""
-                    ),
-
-                "Lifecycle Phase":
-                    self.recommended_phase(
-                        requirement
+                        "",
                     ),
 
                 "Acceptance Criteria":
                     getattr(
                         requirement,
                         "acceptance_criteria",
-                        ""
+                        "",
                     ),
 
                 "GMP Reference":
                     getattr(
                         requirement,
                         "gmp_reference",
-                        ""
+                        "",
+                    ),
+
+                "Inspection Concern":
+                    getattr(
+                        requirement,
+                        "inspection_concern",
+                        "",
+                    ),
+
+                "Regulatory Rationale":
+                    getattr(
+                        requirement,
+                        "regulatory_rationale",
+                        "",
+                    ),
+
+                "Regulatory Sources":
+                    getattr(
+                        requirement,
+                        "regulatory_sources",
+                        [],
+                    ),
+
+                "Supporting Documents":
+                    len(
+                        getattr(
+                            requirement,
+                            "supporting_documents",
+                            [],
+                        )
+                    ),
+
+                "Status":
+                    getattr(
+                        requirement,
+                        "status",
+                        "",
                     ),
 
                 "Verified":
                     getattr(
                         requirement,
                         "verified",
-                        False
-                    )
+                        False,
+                    ),
 
             })
 

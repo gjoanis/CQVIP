@@ -5,7 +5,7 @@
 
     <meta charset="UTF-8">
 
-    <title>Upload URS</title>
+    <title>Upload Lifecycle Document</title>
 
     <link rel="stylesheet" href="/static/style.css">
 
@@ -31,48 +31,154 @@
 
 <div class="container">
 
-    <h1>Upload User Requirements Specification</h1>
+    <h1>Upload Lifecycle Document</h1>
 
     <p class="subtitle">
 
-        Upload a URS document for AI requirement extraction,
-        classification, traceability and protocol generation.
+        Upload any CQV lifecycle document for AI analysis,
+        requirement extraction, traceability and inspection readiness.
 
     </p>
 
-    <form
-        action="/upload-document"
-        method="post"
-        enctype="multipart/form-data"
-        class="upload-form"
+<form
+    action="/upload-document"
+    method="post"
+    enctype="multipart/form-data"
+    class="upload-form"
+>
+
+    <label><strong>Facility</strong></label>
+
+    <input
+        type="text"
+        name="facility"
+        placeholder="e.g. Merck West Point"
+        required
     >
 
-        <input
-            type="file"
-            name="file"
-            accept=".docx"
-            required
-        >
+    <br><br>
 
-        <br><br>
+    <label><strong>Project</strong></label>
 
-        <button
-            type="submit"
-            class="button"
-        >
-            Analyze URS
-        </button>
-
-    </form>
-
-    <br>
-
-    <a
-        href="/dashboard"
-        class="button secondary"
+    <input
+        type="text"
+        name="project"
+        placeholder="e.g. Building Expansion"
+        required
     >
-        Return to Dashboard
-    </a>
+
+    <br><br>
+
+    <label><strong>System</strong></label>
+
+    <input
+        type="text"
+        name="system"
+        placeholder="e.g. HVAC System"
+        required
+    >
+
+    <br><br>
+
+    <label><strong>Lifecycle Stage</strong></label>
+
+    <select
+        name="lifecycle_stage_id"
+        required
+    >
+
+        <option value="1">Planning & Requirements</option>
+        <option value="2">Design Qualification (DQ)</option>
+        <option value="3">Factory Acceptance Testing (FAT)</option>
+        <option value="4">Site Acceptance Testing (SAT)</option>
+        <option value="5">Engineering Studies</option>
+        <option value="6">Commissioning</option>
+        <option value="7">Operational Readiness</option>
+        <option value="8">Installation Qualification (IQ)</option>
+        <option value="9">Operational Qualification (OQ)</option>
+        <option value="10">Performance Qualification (PQ)</option>
+        <option value="11">Continued Verification</option>
+        <option value="12">Retirement</option>
+
+    </select>
+
+    <br><br>
+
+    <label><strong>Document Type</strong></label>
+
+    <select
+        name="document_type_id"
+        required
+    >
+
+        <option value="1">User Requirements Specification (URS)</option>
+        <option value="2">Functional Specification</option>
+        <option value="3">Design Specification</option>
+        <option value="4">Risk Assessment</option>
+        <option value="5">Validation Plan</option>
+        <option value="6">Design Qualification Protocol</option>
+        <option value="7">Design Qualification Report</option>
+        <option value="8">FAT Protocol</option>
+        <option value="9">FAT Report</option>
+        <option value="10">SAT Protocol</option>
+        <option value="11">SAT Report</option>
+        <option value="12">Engineering Study Protocol</option>
+        <option value="13">Engineering Study Report</option>
+        <option value="14">Commissioning Plan</option>
+        <option value="15">Commissioning Protocol</option>
+        <option value="16">Commissioning Test Script</option>
+        <option value="17">Commissioning Summary Report</option>
+        <option value="18">Standard Operating Procedure</option>
+        <option value="19">Work Instruction</option>
+        <option value="20">Preventive Maintenance Procedure</option>
+        <option value="21">Calibration Procedure</option>
+        <option value="22">Training Record</option>
+        <option value="23">Installation Qualification Protocol</option>
+        <option value="24">Installation Qualification Report</option>
+        <option value="25">Operational Qualification Protocol</option>
+        <option value="26">Operational Qualification Report</option>
+        <option value="27">Performance Qualification Protocol</option>
+        <option value="28">Performance Qualification Report</option>
+        <option value="29">Periodic Review</option>
+        <option value="30">Change Control</option>
+        <option value="31">Deviation</option>
+        <option value="32">CAPA</option>
+        <option value="33">Requalification Protocol</option>
+        <option value="34">Decommissioning Plan</option>
+        <option value="35">Decommissioning Report</option>
+
+    </select>
+
+    <br><br>
+
+    <label><strong>Document</strong></label>
+
+    <input
+        type="file"
+        name="file"
+        accept=".docx,.pdf"
+        required
+    >
+
+    <br><br>
+
+    <button
+        type="submit"
+        class="button"
+    >
+        Upload Document
+    </button>
+
+</form>
+
+<br>
+
+<a
+    href="/dashboard"
+    class="button secondary"
+>
+    Return to Dashboard
+</a>
 
 </div>
 

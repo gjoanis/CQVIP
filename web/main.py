@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import shutil
@@ -11,6 +12,7 @@ from fastapi import (
     File,
     Form,
     Body,
+    BackgroundTasks,
 )
 
 from fastapi.responses import (
@@ -22,18 +24,30 @@ from fastapi.responses import (
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.services.cqvip_engine import CQVIPEngine
-from app.services.dashboard_service import DashboardService
-from app.services.ai_protocol_generator import AIProtocolGenerator
-from app.services.traceability_engine import TraceabilityEngine
 from app.database.database import initialize_database
+
+from app.database.system_repository import SystemRepository
+from app.database.document_repository import DocumentRepository
 from app.database.requirement_repository import RequirementRepository
+from app.database.supporting_document_repository import (
+    SupportingDocumentRepository,
+)
 
-from app.database.supporting_document_repository import SupportingDocumentRepository
+from app.models.document import Document
 
+from app.parsers.document_loader import DocumentLoader
+from app.parsers.urs_parser import URSParser
+
+from app.services.document_classifier import DocumentClassifier
+from app.services.dashboard_service import DashboardService
 from app.services.document_ai_service import DocumentAIService
+from app.services.traceability_engine import TraceabilityEngine
+from app.services.ai_protocol_generator import AIProtocolGenerator
+from app.services.cqvip_engine import CQVIPEngine
+
 
 app = FastAPI(title="CQVIP")
+
 initialize_database()
 
 templates = Jinja2Templates(
@@ -99,10 +113,7 @@ def login(
     password: str = Form(...),
 ):
 
-    if (
-        username == "demo"
-        and password == "demo123"
-    ):
+    if username == "demo" and password == "demo123":
 
         return RedirectResponse(
             "/dashboard",
@@ -131,8 +142,12 @@ def dashboard(request: Request):
         },
     )
 
+
 @app.get("/requirement/{req_id}", response_class=HTMLResponse)
-def requirement_workspace(request: Request, req_id: str):
+def requirement_workspace(
+    request: Request,
+    req_id: str,
+):
 
     requirement = RequirementRepository.get(req_id)
 
@@ -158,103 +173,99 @@ def upload_page(request: Request):
 @app.post("/upload-document", response_class=HTMLResponse)
 async def upload_document(
     request: Request,
+    background_tasks: BackgroundTasks,
+    facility: str = Form(...),
+    project: str = Form(...),
+    system: str = Form(...),
+    lifecycle_stage_id: int = Form(...),
+    document_type_id: int = Form(...),
     file: UploadFile = File(...),
 ):
+    print("===== UPLOAD ROUTE HIT =====", flush=True)
+
+    print("1. Saving uploaded file", flush=True)
 
     destination = DOCUMENTS / file.filename
 
     with open(destination, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
-        shutil.copyfileobj(
-            file.file,
-            buffer,
-        )
+        print("2. File saved", flush=True)
 
-    from app.parsers.document_loader import (
-        DocumentLoader,
+    text = DocumentLoader.load(str(destination))
+
+    print("3. Document loaded", flush=True)
+
+    system_id = SystemRepository.get_or_create(
+        facility_name=facility,
+        project_name=project,
+        system_name=system,
     )
 
-    from app.parsers.urs_parser import (
-        URSParser,
+    print("4. System created", flush=True)
+
+    metadata = DocumentClassifier.classify(
+        file.filename,
+        text,
     )
 
-    from app.services.ai_urs_analyzer import (
-        AIURSAnalyzer,
+    print("5. Document classified", flush=True)
+
+    document = Document(
+
+        system_id=system_id,
+
+        lifecycle_stage_id=lifecycle_stage_id,
+
+        document_type_id=document_type_id,
+
+        title=file.filename,
+
+        filename=file.filename,
+
+        original_filename=file.filename,
+
+        file_path=str(destination),
+
+        uploaded_by="System",
+
     )
 
-    text = DocumentLoader.load_docx(
-        str(destination)
-    )
+    document.lifecycle_stage = metadata["lifecycle_stage"]
+    document.document_type = metadata["document_type"]
 
-    requirements = (
-        URSParser(text)
-        .extract_requirements()
-    )
+    document = DocumentRepository.create(document)
 
-    payload = [
-        {
-            "req_id": r.req_id,
-            "text": r.text,
-        }
-        for r in requirements
-    ]
+    print("6. Document created", flush=True)
 
-    ai_results = AIURSAnalyzer().analyze(
-        payload
-    )
+    requirements = URSParser(
+        text
+    ).extract_requirements()
+
+    print(f"7. Parsed {len(requirements)} requirements", flush=True)
 
     for req in requirements:
+        print("8. Requirements saved", flush=True)
 
-        ai = next(
-            (
-                item
-                for item in ai_results
-                if item["req_id"] == req.req_id
-            ),
-            {},
-        )
+        req.system_id = system_id
 
-        req.category = ai.get("category")
+        req.document_id = document.id
 
-        req.criticality = ai.get("criticality")
+        req.source_req_id = req.req_id
 
-        req.recommended_verification = ai.get(
-            "verification"
-        )
+        req.lifecycle_stage = document.lifecycle_stage
 
-        req.risk = ai.get("risk")
+        req.document_type = document.document_type
 
-        req.gmp_reference = ai.get(
-            "gmp_reference"
-        )
-
-        req.acceptance_criteria = ai.get(
-            "acceptance_criteria"
-        )
-
-        req.suggested_test = ai.get(
-            "suggested_test"
-        )
-
-        req.protocol_section = ai.get(
-            "protocol_section"
-        )
-
-        req.test_steps = ai.get(
-            "test_steps",
-            [],
-        )
-
-        req.objective_evidence = ai.get(
-            "objective_evidence",
-            [],
-        )
+        req.document_name = document.name
 
         RequirementRepository.save(req)
 
     dashboard = DashboardService(
-        requirements
+        RequirementRepository.all()
     ).build()
+
+    print("9. Dashboard built", flush=True)
 
     return templates.TemplateResponse(
         request=request,
@@ -276,6 +287,7 @@ def update_status(data: dict = Body(...)):
         "success": True
     }
 
+
 @app.post("/api/assign-owner")
 def assign_owner(data: dict = Body(...)):
 
@@ -287,6 +299,7 @@ def assign_owner(data: dict = Body(...)):
     return {
         "success": True
     }
+
 
 @app.post("/api/upload-supporting-document")
 async def upload_supporting_document(
@@ -301,43 +314,74 @@ async def upload_supporting_document(
     with open(destination, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    requirement = RequirementRepository.get(requirement_id)
+    requirement = RequirementRepository.get(
+        requirement_id
+    )
 
-    ai_service = DocumentAIService()
+    analysis = DocumentAIService().analyze_document(
 
-    analysis = ai_service.analyze_document(
         requirement_text=requirement.text,
+
         file_path=str(destination),
+
+        document_type=document_type,
+
+        lifecycle_stage=getattr(
+            requirement,
+            "lifecycle_stage",
+            "",
+        ),
+
     )
 
     SupportingDocumentRepository.save(
+
         requirement_id=requirement_id,
+
         filename=file.filename,
+
         document_type=document_type,
+
         file_path=str(destination),
+
         uploaded_by=uploaded_by,
+
         ai_processed=True,
+
         ai_summary=analysis["summary"],
+
     )
 
     return {
+
         "success": True,
+
         "analysis": analysis,
+
     }
+
 
 @app.post("/api/mark-not-applicable")
 def mark_not_applicable(data: dict = Body(...)):
 
     RequirementRepository.mark_not_applicable(
+
         req_id=data["req_id"],
+
         reason=data["reason"],
+
         justification=data["justification"],
+
         approved_by=data["approved_by"],
+
     )
 
     return {
+
         "success": True
+
     }
+
 
 @app.post("/generate-package")
 def generate_package():
@@ -354,15 +398,11 @@ def generate_package():
         engine.requirements
     ).generate()
 
-    traceability_file = (
-        EXPORTS / "traceability.json"
-    )
-
-    protocol_file = (
-        EXPORTS / "protocol.json"
-    )
-
     import json
+
+    traceability_file = EXPORTS / "traceability.json"
+
+    protocol_file = EXPORTS / "protocol.json"
 
     with open(
         traceability_file,
@@ -388,26 +428,35 @@ def generate_package():
             indent=4,
         )
 
-    engine.run()
-
     package_folder = EXPORTS / "Validation_Package"
 
     if package_folder.exists():
 
         shutil.make_archive(
+
             str(package_folder),
+
             "zip",
+
             root_dir=package_folder,
+
         )
 
-        generated_zip = EXPORTS / "Validation_Package.zip"
+        generated_zip = (
+            EXPORTS /
+            "Validation_Package.zip"
+        )
 
         if generated_zip.exists():
 
             return FileResponse(
+
                 generated_zip,
+
                 media_type="application/zip",
+
                 filename="Validation_Package.zip",
+
             )
 
     raise RuntimeError(
@@ -419,9 +468,13 @@ def generate_package():
 def download():
 
     return FileResponse(
+
         PACKAGE,
+
         media_type="application/zip",
+
         filename="Validation_Package.zip",
+
     )
 
 
@@ -429,9 +482,13 @@ def download():
 def health():
 
     return {
+
         "status": "ok",
+
         "application": "CQVIP",
-        "version": "2.0",
+
+        "version": "3.0",
+
     }
 
 
@@ -440,16 +497,26 @@ def dashboard_api():
 
     return load_dashboard()
 
+
 @app.get("/api/dashboard-version")
 def dashboard_version():
 
     dashboard = load_dashboard()
 
     return {
+
         "total": dashboard["total_requirements"],
+
         "open": dashboard["open_requirements"],
+
         "readiness": dashboard["quality_compliance_readiness"],
+
+        "inspection": dashboard["inspection_readiness"],
+
+        "phase": dashboard["current_phase"],
+
     }
+
 
 @app.get("/api/traceability")
 def traceability_api():
@@ -480,8 +547,13 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
+
         "web.main:app",
+
         host="127.0.0.1",
+
         port=8000,
+
         reload=True,
+
     )

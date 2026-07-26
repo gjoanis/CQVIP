@@ -24,11 +24,75 @@ class DashboardService:
             if not getattr(r, "verified", False)
         )
 
-        readiness = ReadinessEngine(self.requirements).calculate()
+        readiness = ReadinessEngine(
+            self.requirements
+        ).calculate()
 
-        charts = ChartService(self.requirements)
+        charts = ChartService(
+            self.requirements
+        )
 
-        ai = AIInsights(self.requirements)
+        ai = AIInsights(
+            self.requirements
+        )
+
+        lifecycle_summary = []
+
+        stages = [
+            "Planning & Requirements",
+            "Design Qualification",
+            "Factory Acceptance Testing",
+            "Site Acceptance Testing",
+            "Engineering Studies",
+            "Commissioning",
+            "Operational Readiness",
+            "Installation Qualification",
+            "Operational Qualification",
+            "Performance Qualification",
+            "Continued Verification",
+            "Retirement",
+        ]
+
+        for stage in stages:
+
+            docs = [
+                r for r in self.requirements
+                if getattr(r, "lifecycle_stage", None) == stage
+            ]
+
+            verified = sum(
+                1
+                for r in docs
+                if getattr(r, "verified", False)
+            )
+
+            if len(docs) == 0:
+
+                status = "Pending"
+
+            elif verified == len(docs):
+
+                status = "Complete"
+
+            elif verified > 0:
+
+                status = "In Progress"
+
+            else:
+
+                status = "Open"
+
+            lifecycle_summary.append({
+
+                "stage": stage,
+
+                "status": status,
+
+                "requirements": len(docs),
+
+                "verified": verified,
+
+            })
 
         return {
 
@@ -58,147 +122,6 @@ class DashboardService:
 
             "ai_recommendations": ai.generate_recommendations(),
 
-            "lifecycle": [
-
-                {
-                    "stage": "Requirements Loaded",
-                    "status": "Complete" if total > 0 else "Pending",
-                },
-
-                {
-                    "stage": "Requirements Assigned",
-                    "status":
-                        "Complete" if total > 0 and all(
-                            r.status in [
-                                "Assigned",
-                                "In Progress",
-                                "Under Review",
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "In Progress" if any(
-                            r.status in [
-                                "Assigned",
-                                "In Progress",
-                                "Under Review",
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "Pending",
-                },
-
-                {
-                    "stage": "Validation In Progress",
-                    "status":
-                        "Complete" if total > 0 and all(
-                            r.status in [
-                                "In Progress",
-                                "Under Review",
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "In Progress" if any(
-                            r.status in [
-                                "In Progress",
-                                "Under Review",
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "Pending",
-                },
-
-                {
-                    "stage": "Technical Review",
-                    "status":
-                        "Complete" if total > 0 and all(
-                            r.status in [
-                                "Under Review",
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "In Progress" if any(
-                            r.status in [
-                                "Under Review",
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "Pending",
-                },
-
-                {
-                    "stage": "Verification",
-                    "status":
-                        "Complete" if total > 0 and all(
-                            r.status in [
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "In Progress" if any(
-                            r.status in [
-                                "Verified",
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "Pending",
-                },
-
-                {
-                    "stage": "Approval",
-                    "status":
-                        "Complete" if total > 0 and all(
-                            r.status in [
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "In Progress" if any(
-                            r.status in [
-                                "Approved",
-                                "Closed"
-                            ]
-                            for r in self.requirements
-                        )
-                        else "Pending",
-                },
-
-                {
-                    "stage": "Project Closed",
-                    "status":
-                        "Complete" if total > 0 and all(
-                            r.status == "Closed"
-                            for r in self.requirements
-                        )
-                        else "In Progress" if any(
-                            r.status == "Closed"
-                            for r in self.requirements
-                        )
-                        else "Pending",
-                },
-
-            ]
+            "lifecycle": lifecycle_summary,
 
         }
