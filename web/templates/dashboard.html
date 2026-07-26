@@ -135,30 +135,6 @@
 
     </div>
 
-        <div class="card">
-
-            <h2 id="criticalRequirements">
-                {{ dashboard.critical_requirements }}
-            </h2>
-
-            <p>
-                Critical Requirements
-            </p>
-
-        </div>
-
-        <div class="card">
-
-            <h2 id="openRequirements">
-                {{ dashboard.open_requirements }}
-            </h2>
-
-            <p>
-                Open Requirements
-            </p>
-
-        </div>
-
     <!-- Requirements -->
 
     <h2>
@@ -588,12 +564,6 @@
 
         document.getElementById("totalRequirements").textContent =
             data.total_requirements;
-
-        document.getElementById("criticalRequirements").textContent =
-            data.critical_requirements;
-
-        document.getElementById("openRequirements").textContent =
-            data.open_requirements;
 
         document.getElementById("readinessScore").textContent =
             data.readiness_score + "%";
