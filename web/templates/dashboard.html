@@ -73,29 +73,44 @@
         AI-powered project readiness, inspection readiness, and compliance intelligence.
     </p>
 
-    <div class="cards" id="executiveCards">
+<div class="cards" id="executiveCards">
 
-        <div class="card">
-            <h2>{{ dashboard.quality_compliance_readiness }}%</h2>
-            <p>Overall Quality Compliance Readiness</p>
-        </div>
-
-        <div class="card">
-            <h2>{{ dashboard.inspection_readiness }}%</h2>
-            <p>Inspection Readiness</p>
-        </div>
-
-        <div class="card">
-            <h2>{{ dashboard.current_phase }}</h2>
-            <p>Current Phase</p>
-        </div>
-
-        <div class="card">
-            <h2>{{ dashboard.project_health }}</h2>
-            <p>Project Health</p>
-        </div>
-
+    <div class="card">
+        <h2 id="lifecycleReadiness">
+            {{ dashboard.quality_compliance_readiness }}%
+        </h2>
+        <p>Validation Lifecycle Readiness</p>
     </div>
+
+    <div class="card">
+        <h2 id="inspectionReadiness">
+            {{ dashboard.inspection_readiness }}%
+        </h2>
+        <p>Inspection Readiness Index (IRI)</p>
+    </div>
+
+    <div class="card">
+        <h2 id="executionReadiness">
+            {{ dashboard.validation_execution_readiness }}%
+        </h2>
+        <p>Validation Execution Readiness</p>
+    </div>
+
+    <div class="card">
+        <h2 id="currentPhase">
+            {{ dashboard.current_phase }}
+        </h2>
+        <p>Current Lifecycle Stage</p>
+    </div>
+
+    <div class="card">
+        <h2 id="projectHealth">
+            {{ dashboard.project_health }}
+        </h2>
+        <p>Project Health</p>
+    </div>
+
+</div>
 
     <h2>
         Phase Readiness
@@ -560,17 +575,23 @@
     }
 
 
-    function renderExecutiveCards(data) {
+function renderExecutiveCards(data) {
 
-        document.getElementById("totalRequirements").textContent =
-            data.total_requirements;
+    document.getElementById("lifecycleReadiness").textContent =
+        data.quality_compliance_readiness + "%";
 
-        document.getElementById("readinessScore").textContent =
-            data.readiness_score + "%";
+    document.getElementById("inspectionReadiness").textContent =
+        data.inspection_readiness + "%";
 
-        document.getElementById("readinessStatus").textContent =
-            data.readiness_status;
-    }
+    document.getElementById("executionReadiness").textContent =
+        data.validation_execution_readiness + "%";
+
+    document.getElementById("currentPhase").textContent =
+        data.current_phase;
+
+    document.getElementById("projectHealth").textContent =
+        data.project_health;
+}
 
 
     function renderLifecycle(lifecycle) {

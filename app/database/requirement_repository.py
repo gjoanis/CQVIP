@@ -16,11 +16,14 @@ class RequirementRepository:
             """
             INSERT OR REPLACE INTO requirements
             (
-                req_id,
-                source_req_id,
-                system_id,
-                document_id,
-                text,
+               req_id,
+               source_req_id,
+               system_id,
+               document_id,
+               lifecycle_stage,
+               document_type,
+               document_name,
+               text,
                 category,
                 criticality,
                 verification,
@@ -50,7 +53,7 @@ class RequirementRepository:
 
             VALUES
             (
-                ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+               ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
             )
             """,
             (
@@ -58,6 +61,9 @@ class RequirementRepository:
                 getattr(requirement, "source_req_id", requirement.req_id),
                 requirement.system_id,
                 getattr(requirement, "document_id", None),
+                getattr(requirement, "lifecycle_stage", None),
+                getattr(requirement, "document_type", None),
+                getattr(requirement, "document_name", None),
                 requirement.text,
                 requirement.category,
                 requirement.criticality,
@@ -105,6 +111,9 @@ class RequirementRepository:
             category=row["category"],
         )
 
+        req.lifecycle_stage = row["lifecycle_stage"]
+        req.document_type = row["document_type"]
+        req.document_name = row["document_name"]
         req.criticality = row["criticality"]
         req.recommended_verification = row["verification"]
         req.status = row["status"]

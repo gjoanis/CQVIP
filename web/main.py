@@ -236,6 +236,13 @@ async def upload_document(
 
     document = DocumentRepository.create(document)
 
+    print(
+        f"Stage={document.lifecycle_stage}, "
+        f"Type={document.document_type}, "
+        f"Title={document.title}",
+        flush=True,
+    )
+
     print("6. Document created", flush=True)
 
     requirements = URSParser(
@@ -257,7 +264,7 @@ async def upload_document(
 
         req.document_type = document.document_type
 
-        req.document_name = document.name
+        req.document_name = document.title
 
         RequirementRepository.save(req)
 
